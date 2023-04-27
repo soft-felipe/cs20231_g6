@@ -41,7 +41,7 @@ Esta API será construída pelos componentes do grupo 6:
 <Descrever a tecnologia que será utilizada para Persistência de dados.>
 
 ### Local do _Deploy_
-<Descrever onde será feito o _deploy_ da API.>
+O nosso planejamento inicial é hospedar nossa aplicação no Heroku ou no Firebase do Google, sendo crucial para nossa escolha a facilidade de configuração e também os recursos ofertados na versão gratuita.
 
 ### Cronograma de Desenvolvimento
 
