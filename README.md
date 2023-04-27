@@ -22,13 +22,14 @@ Esta API será construída pelos componentes do grupo 6:
 3. RF005 - <descrever>
 
 ### Requisitos Não Funcionais
-<Descrever os requisitos não funcionais identificados no mesmo modelo da descrição dos requisitos funcionais>
+1. RNF001 - Compatibilidade: A aplicação deve ser compatível com os principais navegadores web, como Chrome e Firefox por exemplo.
+2. RNF002 - Legibilidade: Possuir interface legível para o usuário.
 
 ### Regras de Negócio
-1. RN01 - <descrever>
-2. RN02 - <descrever>
-
-<Adicionar outras regras, se existirem.>
+1. RN01 - Níveis de acesso: Definir diferentes níveis de permissões para os usuários, de acordo com suas funções e responsabilidades.
+2. RN02 - Gerenciamento de usuários: Possibilidade que os usuários criaem e gerenciem suas próprias contas.
+3. RN03 - Monitoramento dos projetos: Os usuários que possuem maior nível de permissão dentro de um projeto, podem monitorar as atividades dos outros participantes.
+4. RN04 - Políticas de segurança: Regras e sugestões claras acerca das políticas de segurança para os usuários, como boas práticas para criação de senhas e proteção de informações pessoais.
 
 ### Tecnologia de _Front-end_
 <Descrever a tecnologia que será utilizada no _front-end_.>
