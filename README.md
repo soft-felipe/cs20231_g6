@@ -62,14 +62,17 @@ Esta API será construída pelos componentes do grupo 6:
 
 3. RNF003 - Desempenho: A aplicação deve apresentar os dados em tempo real para todos os usuários.
 
-4. RNF004 - Confiabilidade: A aplicação deve se comportar conforme o esperado.
+4. RNF004 - Confiabilidade: A aplicação deve se comportar conforme o esperado e estar disponível para todos os usuários.
 
 5. RNF005 - Manutenibilidade: A aplicação deve ser fácil de manter e evoluir.
+
+6. RNF006 - Portabilidade: A aplicação deve ser acessível por dispositivos móveis.
+
+7. RNF007 - Conectividade: A aplicação deve implementar uma API Rest.
 
 ### Regras de Negócio
 1. RN01 - Atribuição de tarefas: o usuário deve poder atribuir tarefas a outros usuários e a si mesmo.
 2. RN02 - Definição de prazos: o usuário deve poder definir prazos para as tarefas.
-3. RN03 - Aplicação mobile: a aplicação deve ser acessível por dispositivos móveis.
 
 ### Tecnologia de _Front-end_
 Flutter.
