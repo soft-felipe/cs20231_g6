@@ -45,7 +45,7 @@ Esta API será construída pelos componentes do grupo 6:
 
 5. RF005 - Funcionalidade: Criar tarefas.
 
-**COMO usuário, QUERO criar tarefas, podendo definir o responsável por essa tarefa e o praza para a sua conclusão, PARA declarar as atividades que devem ser realizadas.**
+**COMO usuário, QUERO criar tarefas, PARA declarar as atividades que devem ser realizadas.**
 
 6. RF006 - Funcionalidade: Atualizar status de tarefas.
 
@@ -66,28 +66,27 @@ Esta API será construída pelos componentes do grupo 6:
 
 5. RNF005 - Manutenibilidade: A aplicação deve ser fácil de manter e evoluir.
 
-
-
 ### Regras de Negócio
-1. RN01 - <descrever>
-2. RN02 - <descrever>
-
-<Adicionar outras regras, se existirem.>
+1. RN01 - Atribuição de tarefas: o usuário deve poder atribuir tarefas a outros usuários e a si mesmo.
+2. RN02 - Definição de prazos: o usuário deve poder definir prazos para as tarefas.
+3. RN03 - Aplicação mobile: a aplicação deve ser acessível por dispositivos móveis.
 
 ### Tecnologia de _Front-end_
-<Descrever a tecnologia que será utilizada no _front-end_.>
+Flutter.
 
 ### Tecnologia de _Back-end_
-<Descrever a tecnologia que será utilizada no _front-end_.>
+API Rest construída em Python.
 
 ### Tecnologia de Persistência de Dados
-<Descrever a tecnologia que será utilizada para Persistência de dados.>
+Banco de dados relacional.  
+(Ainda não definido)
 
 ### Local do _Deploy_
-<Descrever onde será feito o _deploy_ da API.>
+(Ainda não defindo)
 
 ### Cronograma de Desenvolvimento
 
 |Iteração|Tarefa|Data Início|Data Fim|Responsável|Situação|
 |---|---|---|---|---|---|
-|1|Especificar História de Usuário 1|02/05/2023|03/05/2023|Vinicius|Programada|
+|1|Estudar e definir o SGBD do projeto|28/04/2023|05/05/2023|Grupo|Programada|
+|2|Estudar e definir o serviço para deploy do projeto|28/04/2023|05/05/2023|Grupo|Programada|
