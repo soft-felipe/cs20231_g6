@@ -56,6 +56,7 @@ Esta API será construída pelos componentes do grupo 6:
 **COMO usuário, QUERO visualizar as tarefas em seus respectivos estados mais recentes, PARA ter uma visão geral do projeto.**
 
 ### Requisitos Não Funcionais
+
 1. RNF001 - Usabilidade: A aplicação deve ser intuitiva e de fácil utilização.
 
 2. RNF002 - Segurança: A aplicação deve garantir a privacidade dos usuários, não permitindo que usuários não autorizados acessem o projeto.
@@ -72,6 +73,7 @@ Esta API será construída pelos componentes do grupo 6:
 
 ### Regras de Negócio
 1. RN01 - Atribuição de tarefas: o usuário deve poder atribuir tarefas a outros usuários e a si mesmo.
+
 2. RN02 - Definição de prazos: o usuário deve poder definir prazos para as tarefas.
 
 ### Tecnologia de _Front-end_
@@ -81,11 +83,10 @@ Flutter.
 API Rest construída em Python.
 
 ### Tecnologia de Persistência de Dados
-Banco de dados relacional.  
-(Ainda não definido)
+Banco de dados relacional.PostgreSQL.
 
 ### Local do _Deploy_
-(Ainda não defindo)
+O nosso planejamento inicial é hospedar nossa aplicação no Heroku ou no Firebase do Google, sendo crucial para nossa escolha a facilidade de configuração e também os recursos ofertados na versão gratuita.
 
 ### Cronograma de Desenvolvimento
 
