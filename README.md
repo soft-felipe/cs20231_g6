@@ -38,7 +38,6 @@ Esta API será construída pelos componentes do grupo 6:
 
 **COMO usuário, QUERO controlar o acesso ao meu projeto, PARA permitir que eu tenho controle de quem participa dele.**
 
-
 4. RF004 - Funcionalidade: Configurar fluxos de trabalho personalizados.
 
 **COMO usuário, QUERO configurar fluxos de trabalho personalizados, PARA adequar o processo de trabalho ao meu projeto.**
@@ -83,7 +82,7 @@ Flutter.
 API Rest construída em Python.
 
 ### Tecnologia de Persistência de Dados
-Banco de dados relacional.PostgreSQL.
+Banco de dados relacional PostgreSQL.
 
 ### Local do _Deploy_
 O nosso planejamento inicial é hospedar nossa aplicação no Heroku ou no Firebase do Google, sendo crucial para nossa escolha a facilidade de configuração e também os recursos ofertados na versão gratuita.
