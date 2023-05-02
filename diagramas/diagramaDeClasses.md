@@ -4,6 +4,8 @@
 title: Diagrama de Classes
 ---
 classDiagram
+    direction LR
+
     class Usuario {
     -String nome
     -String nickname
@@ -40,6 +42,6 @@ classDiagram
 
     Tarefa "N" --> "1" Usuario : Criador
     Tarefa "N" --> "1" Usuario : Responsável
-    Tarefa "N" --> "N" Comentario : Comentario
+    Tarefa "N" --> "N" Comentario : Comentário
 
 ```
