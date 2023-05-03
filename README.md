@@ -55,7 +55,6 @@ Esta API será construída pelos componentes do grupo 6:
 7. RF007 - Funcionalidade: Visualizar tarefas.
 
 **COMO usuário, QUERO visualizar as tarefas em seus respectivos estados mais recentes, PARA ter uma visão geral do projeto.**
->>>>>>> d8978536638782368f44e84da756cca765cf3b60
 
 ### Requisitos Não Funcionais
 1. RNF001 - Usabilidade: A aplicação deve ser intuitiva e de fácil utilização.
@@ -95,3 +94,7 @@ Banco de dados relacional.
 |---|---|---|---|---|---|
 |1|Estudar e definir o SGBD do projeto|28/04/2023|05/05/2023|Grupo|Programada|
 |2|Estudar e definir o serviço para deploy do projeto|28/04/2023|05/05/2023|Grupo|Programada|
+|3| Definir os modelos de classes|06/05/2023|19/05/2023|Grupo|Programada|
+|5| Definir os modelos de dados (ORM)|20/05/2023|02/06/2023|Grupo|Programada|
+|6| Implementação do código |03/06/2023|16/06/2023|Grupo|Programada|
+|7| Testes |22/07/2023|11/08/2023|Grupo|Programada|
