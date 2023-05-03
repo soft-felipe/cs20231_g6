@@ -30,6 +30,16 @@ Esta API será construída pelos componentes do grupo 6:
 201910912|Vinicius Prates Araujo|[PAVincius](https://github.com/PAVincius)|
 
 ### Requisitos Funcionais
+<<<<<<< HEAD
+1. RF001 - Funcionalidade: Gerenciar projetos COMO usuário, QUERO criar um novo projeto no NoteSync PARA poder gerenciar meu trabalho de forma organizada.
+2. RF002 - Funcionalidade: Adicionar novas equipes de trabalho COMO usuário, QUERO adicionar equipes de trabalho ao meu projeto, PARA permitir que as equipes participem e colaborem na execução do projeto.
+3. RF003 - Funcionalidade: Gerenciar usuários COMO usuário, QUERO gerenciar os usuários do meu projeto, PARA controlar o acesso e a participação de cada um nas atividades.
+4. RF004 - Funcionalidade: Configurar fluxos de trabalho personalizados COMO usuário, QUERO configurar fluxos de trabalho personalizados, PARA adequar o processo de trabalho ao meu projeto.
+5. RF005 - Funcionalidade: Adicionar itens ao projeto COMO usuário, QUERO adicionar diferentes tipos de itens ao meu projeto, PARA organizá-lo e gerenciá-lo de forma mais eficiente.
+6. RF006 - Funcionalidade: Atualizar status dos itens COMO usuário, QUERO atualizar o status dos itens do meu projeto, PARA acompanhar o progresso das atividades e ter uma visão geral do projeto.
+7. RF007 - Funcionalidade:Atribuir tarefas a membros da equipe COMO usuário, QUERO atribuir tarefas a membros da equipe do meu projeto,PARA distribuir as atividades e otimizar o trabalho em equipe.
+8. RF008 - Funcionalidade: Definir datas de início e término das tarefas COMO usuário, QUERO definir as datas de início e término das tarefas do meu projeto, PARA ter um controle de prazos e acompanhar o andamento do projeto.
+=======
 1. RF001 - Funcionalidade: Criar um novo projeto.
 
 **COMO usuário, QUERO criar um novo projeto no NoteSync PARA poder gerenciar meu projeto de forma organizada.**
@@ -53,6 +63,7 @@ Esta API será construída pelos componentes do grupo 6:
 7. RF007 - Funcionalidade: Visualizar tarefas.
 
 **COMO usuário, QUERO visualizar as tarefas em seus respectivos estados mais recentes, PARA ter uma visão geral do projeto.**
+>>>>>>> d8978536638782368f44e84da756cca765cf3b60
 
 ### Requisitos Não Funcionais
 
@@ -79,7 +90,7 @@ Esta API será construída pelos componentes do grupo 6:
 Flutter.
 
 ### Tecnologia de _Back-end_
-API Rest construída em Python.
+API Rest construída em Python. (FastAPI)
 
 ### Tecnologia de Persistência de Dados
 Banco de dados relacional PostgreSQL.
