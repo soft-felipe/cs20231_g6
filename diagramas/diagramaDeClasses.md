@@ -37,11 +37,14 @@ classDiagram
     }
 
     Projeto "N" --> "N" Etapa : Estados
+
     Projeto "N" --> "1" Usuario : Criador
 
+    Etapa "1" --> "N" Tarefa : Tarefas
 
     Tarefa "N" --> "1" Usuario : Criador
     Tarefa "N" --> "1" Usuario : Responsável
-    Tarefa "N" --> "N" Comentario : Comentário
+
+    Tarefa "1" --> "N" Comentario : Comentário
 
 ```
