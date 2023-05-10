@@ -30,6 +30,7 @@ Esta API será construída pelos componentes do grupo 6:
 201910912|Vinicius Prates Araujo|[PAVincius](https://github.com/PAVincius)|
 
 ### Requisitos Funcionais
+
 1. RF001 - Funcionalidade: Criar um novo projeto.
 
 **COMO usuário, QUERO criar um novo projeto no NoteSync PARA poder gerenciar meu projeto de forma organizada.**
@@ -79,7 +80,7 @@ Esta API será construída pelos componentes do grupo 6:
 Flutter.
 
 ### Tecnologia de _Back-end_
-API Rest construída em Python.
+API Rest construída em Python. (FastAPI)
 
 ### Tecnologia de Persistência de Dados
 Banco de dados relacional PostgreSQL.
@@ -93,3 +94,7 @@ O nosso planejamento inicial é hospedar nossa aplicação no Heroku ou no Fireb
 |---|---|---|---|---|---|
 |1|Estudar e definir o SGBD do projeto|28/04/2023|05/05/2023|Grupo|Programada|
 |2|Estudar e definir o serviço para deploy do projeto|28/04/2023|05/05/2023|Grupo|Programada|
+|3| Definir os modelos de classes|06/05/2023|19/05/2023|Grupo|Programada|
+|5| Definir os modelos de dados (ORM)|20/05/2023|02/06/2023|Grupo|Programada|
+|6| Implementação do código |03/06/2023|16/06/2023|Grupo|Programada|
+|7| Testes |22/07/2023|11/08/2023|Grupo|Programada|
