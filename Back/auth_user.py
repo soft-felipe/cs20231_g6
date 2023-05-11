@@ -28,6 +28,20 @@ class UsuarioUseCase:
                 detail="Erro ao inserir usuario",
                 status_code=status.HTTP_400_BAD_REQUEST
             )
+            
+    def listar_usuarios(self):
+        usuario_lista = []
+        try:
+            usuario_lista = self.db_session.query(UsuarioModel)
+            return usuario_lista
+        except:
+            raise HTTPException(
+                detail="Erro ao buscar usuarios",
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+            
+        
+        
 
             
 
