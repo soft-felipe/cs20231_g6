@@ -4,13 +4,14 @@ from sqlalchemy.orm import Session
 from depends import get_db_session
 from auth_user import UsuarioUseCase
 from schemas import Usuario
+import json
 
 db_session: Session = Depends(get_db_session)
 
 router = APIRouter(prefix='/usuario')
 
 @router.post('/registrar')
-def registrar_usuario(usuario: Usuario, db_session):
+def registrar_usuario(usuario: Usuario, db_session: Session = Depends(get_db_session)):
     uc = UsuarioUseCase(db_session=db_session)
     uc.registrar_usuario(usuario=usuario)
     return JSONResponse(
@@ -19,10 +20,13 @@ def registrar_usuario(usuario: Usuario, db_session):
     )
     
 @router.get('/get')
-def listar_usuarios(db_session):
+def listar_usuarios(db_session: Session = Depends(get_db_session)):
     uc = UsuarioUseCase(db_session=db_session)
     usuarios = uc.listar_usuarios()
+    user_dict = []
+    for u in usuarios:
+        user_dict.append(u.to_dict())
     return JSONResponse(
-        content= usuarios,
+        content=user_dict,
         status_code=status.HTTP_200_OK
     )

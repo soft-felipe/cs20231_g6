@@ -5,6 +5,8 @@ from schemas import Usuario
 from passlib.context import CryptContext
 from fastapi.exceptions import HTTPException
 from fastapi import status
+from sqlalchemy.ext.declarative import DeclarativeMeta
+import json
 
 crypt_context = CryptContext(schemes=['sha256_crypt'])
 
@@ -30,15 +32,15 @@ class UsuarioUseCase:
             )
             
     def listar_usuarios(self):
-        usuario_lista = []
         try:
-            usuario_lista = self.db_session.query(UsuarioModel)
+            usuario_lista = self.db_session.query(UsuarioModel).all()
             return usuario_lista
         except:
             raise HTTPException(
                 detail="Erro ao buscar usuarios",
                 status_code=status.HTTP_400_BAD_REQUEST
             )
+    
             
         
         
