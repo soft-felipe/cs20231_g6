@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from database.models import UsuarioModel
-from schemas import Usuario
+from database.models import UsuarioModel, UsuarioLoginModel
+from schemas import Usuario, UsuarioLogin
 from passlib.context import CryptContext
 from fastapi.exceptions import HTTPException
 from fastapi import status
@@ -17,17 +17,15 @@ ALGORITHM = config('ALGORITHM')
 
 crypt_context = CryptContext(schemes=['sha256_crypt'])
 
-class UsuarioUseCase:
+class UsuarioLoginService:
     def __init__(self, db_session:Session):
         self.db_session = db_session
 
-    def registrar_usuario(self, usuario:Usuario):
-        usuario_model = UsuarioModel(
+    def registrar_usuario_login(self, usuario:UsuarioLogin):
+        usuario_model = UsuarioLoginModel(
             username = usuario.username,
             senha = crypt_context.hash(usuario.senha),
-            email = usuario.email,
-            data_nascimento = usuario.data_nascimento,
-            nome_completo = usuario.nome_completo
+            email = usuario.email
         )
         try:
             self.db_session.add(usuario_model)
@@ -37,10 +35,11 @@ class UsuarioUseCase:
                 detail="Erro ao inserir usuario",
                 status_code=status.HTTP_400_BAD_REQUEST
             )
-            
-    def listar_usuarios(self):
+    
+    #todo    
+    def listar_usuarios_login(self):
         try:
-            usuario_lista = self.db_session.query(UsuarioModel).all()
+            usuario_lista = self.db_session.query(UsuarioLoginModel).all()
             return usuario_lista
         except:
             raise HTTPException(
@@ -49,8 +48,8 @@ class UsuarioUseCase:
             )
             
             
-    def login_usuario(self, usuario:Usuario, expires_in: int = 60):
-        usuario_back = self.db_session.query(UsuarioModel).filter_by(username=usuario.username).first()
+    def login_usuario(self, usuario:UsuarioLogin, expires_in: int = 60):
+        usuario_back = self.db_session.query(UsuarioLoginModel).filter_by(username=usuario.username).first()
         
         if usuario_back is None:
             raise HTTPException(
@@ -88,7 +87,7 @@ class UsuarioUseCase:
             )
         
         
-        usuario_back = self.db_session.query(UsuarioModel).filter_by(username=data['sub']).first()
+        usuario_back = self.db_session.query(UsuarioLoginModel).filter_by(username=data['sub']).first()
         
         if usuario_back is None:
             raise HTTPException(

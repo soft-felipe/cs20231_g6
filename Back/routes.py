@@ -3,8 +3,8 @@ from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from depends import get_db_session, token_verifier
-from auth_user import UsuarioUseCase
-from schemas import Usuario
+from services.usuario_service import UsuarioLoginService
+from schemas import Usuario, UsuarioLogin
 import json
 
 db_session: Session = Depends(get_db_session)
@@ -14,8 +14,8 @@ test_router = APIRouter(prefix='/teste', dependencies=[Depends(token_verifier)])
 
 @usuario_router.post('/registrar')
 def registrar_usuario(usuario: Usuario, db_session: Session = Depends(get_db_session)):
-    uc = UsuarioUseCase(db_session=db_session)
-    uc.registrar_usuario(usuario=usuario)
+    uc = UsuarioLoginService(db_session=db_session)
+    uc.registrar_usuario_login(usuario=usuario)
     return JSONResponse(
         content={'msg':"Usuario registrado com sucesso."},
         status_code=status.HTTP_201_CREATED
@@ -23,8 +23,8 @@ def registrar_usuario(usuario: Usuario, db_session: Session = Depends(get_db_ses
     
 @usuario_router.get('/listar')
 def listar_usuarios(db_session: Session = Depends(get_db_session)):
-    uc = UsuarioUseCase(db_session=db_session)
-    usuarios = uc.listar_usuarios()
+    uc = UsuarioLoginService(db_session=db_session)
+    usuarios = uc.listar_usuarios_login()
     user_dict = []
     for u in usuarios:
         user_dict.append(u.to_dict())
@@ -35,8 +35,8 @@ def listar_usuarios(db_session: Session = Depends(get_db_session)):
     
 @usuario_router.post('/login')
 def login_usuario(request_form_usuario: OAuth2PasswordRequestForm = Depends(), db_session: Session = Depends(get_db_session)):
-    uc = UsuarioUseCase(db_session=db_session)
-    usuario = Usuario(
+    uc = UsuarioLoginService(db_session=db_session)
+    usuario = UsuarioLogin(
         username=request_form_usuario.username,
         senha=request_form_usuario.password 
     )
