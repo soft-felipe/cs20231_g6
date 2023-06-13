@@ -1,5 +1,6 @@
 package com.csg6.backend.Service;
 
+import com.csg6.backend.Exception.DAOException;
 import com.csg6.backend.Model.Usuario;
 import com.csg6.backend.Repository.UsuarioRepository;
 import com.csg6.backend.Service.Interface.UsuarioServiceInterface;
@@ -37,6 +38,15 @@ public class UsuarioService implements UsuarioServiceInterface {
         return u;
     }
 
-
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED, rollbackFor = java.lang.Exception.class, timeout = 60)
+    public void deletar(Usuario usuario){
+        try{
+            usuarioRepository.deleteById(usuario.getId());
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            throw new DAOException("Erro ao deletar usuário");
+        }
+    }
 
 }
