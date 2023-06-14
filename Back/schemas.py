@@ -1,16 +1,16 @@
-from pydantic import BaseModel, validator, EmailStr
+from pydantic import BaseModel, validator, EmailStr, Field
 import datetime
 import re
 
 class Usuario(BaseModel):
+    email: EmailStr
     data_nascimento: datetime.date
     nome_completo: str
     avatar: str
     
 class UsuarioLogin(BaseModel):
-    username: str
-    email: EmailStr
-    senha: str
+    username: str = Field(None)
+    senha: str = Field(None)
     
     @validator('username')
     def validar_username(cls, value):
