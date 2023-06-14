@@ -1,27 +1,25 @@
-
-from typing import Optional
-
 from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi.staticfiles import StaticFiles
+from core.config import settings
+from apis.general_pages.route_homepage import general_pages_router
+from db.session import engine   #new
+from db.base_class import Base  #new
 
-class Item(BaseModel):
-    name: str
-    description: Optional[str] = None
-    price: float
-    tax: Optional[float] = None
 
-app = FastAPI()
+def include_router(app):
+	app.include_router(general_pages_router)
 
-projects = [
-    {'name': 'Project 1', 'creator': {'User':{'name':'John', 'nickname':'Jo'}},'step':'1', 'tasks':[1,2,3,4,5], 'team':[{'User':{'name':'Doe', 'nickname':'Do'}},{'User':{'name':'John', 'nickname':'Jo'}}]},
-    {'name': 'Project 1', 'creator': {'User':{'name':'Doe', 'nickname':'Do'}},'step':'1', 'tasks':[6,7], 'team': [{'User':{'name':'John', 'nickname':'Jo'}},{'User':{'name':'Doe', 'nickname':'Do'}}]}
-]
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+def configure_static(app):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.post("/projects/")
-async def create_project():
-    return {'projects':projects}
+
+def create_tables():           #new
+	Base.metadata.create_all(bind=engine)
+
+	
+def start_application():
+	app = FastAPI(title=settings.PROJECT_NAME,version=settings.PROJECT_VERSION)
+
+app = start_application()
 
