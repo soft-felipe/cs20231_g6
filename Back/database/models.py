@@ -14,10 +14,9 @@ class UsuarioModel(Base, SerializerMixin):
     data_criacao = Column('data_criacao', Date, nullable=True)
 
 class UsuarioLoginModel(Base, SerializerMixin):
-    __tablename__ = 'usuario_login'
+    __tablename__ = 'login'
     
-    id = Column('id', Integer, primary_key=True, autoincrement=True)
-    username = Column('username', String, nullable=False)
-    email = Column('email', String, nullable=False)
+    id_login = Column('id_login', Integer, primary_key=True, autoincrement=True)
+    login = Column('login', String, nullable=False)
     senha = Column('senha', String, nullable=False)
-
+    email = Column('email', String, nullable=True)
