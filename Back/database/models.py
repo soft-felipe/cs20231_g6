@@ -5,10 +5,13 @@ from sqlalchemy_serializer import SerializerMixin
 class UsuarioModel(Base, SerializerMixin):
     __tablename__ = 'usuario'
     
-    id = Column('id', Integer, primary_key=True, autoincrement=True)
-    data_nascimento = Column('data_nascimento', Date, nullable=False)
-    nome_completo = Column('nome_completo', String, nullable=False)
+    id_usuario = Column('id_usuario', Integer, primary_key=True, autoincrement=True)
+    id_credencial = Column('id_credencial', Integer, foreign_key=True)
+    apelido = Column('apelido', String, nullable=True)
+    nome_completo = Column('nome_completo', String, nullable=True)
+    data_nasc = Column('data_nasc', Date, nullable=True)
     avatar = Column('avatar', String, nullable=True)
+    data_criacao = Column('data_criacao', Date, nullable=True)
 
 class UsuarioLoginModel(Base, SerializerMixin):
     __tablename__ = 'usuario_login'
