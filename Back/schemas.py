@@ -3,9 +3,13 @@ import datetime
 import re
 
 class Usuario(BaseModel):
-    data_nascimento: datetime.date
+    id_usuario: int
+    id_credencial: int
+    apelido: str
     nome_completo: str
+    data_nascimento: datetime.date
     avatar: str
+    data_criacao: datetime.date
     
 class UsuarioLogin(BaseModel):
     username: str
