@@ -12,9 +12,10 @@ class Usuario(BaseModel):
     data_criacao: datetime.date
     
 class UsuarioLogin(BaseModel):
-    username: str
-    email: EmailStr
+    id_login: int
+    login: str
     senha: str
+    email: EmailStr
     
     @validator('username')
     def validar_username(cls, value):
