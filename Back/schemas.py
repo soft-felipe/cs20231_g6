@@ -1,6 +1,5 @@
-from pydantic import BaseModel, validator, EmailStr
+from pydantic import BaseModel, EmailStr
 import datetime
-import re
 
 class Usuario(BaseModel):
     apelido: str
