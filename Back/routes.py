@@ -13,7 +13,7 @@ usuario_router = APIRouter(prefix='/usuario')
 test_router = APIRouter(prefix='/teste', dependencies=[Depends(token_verifier)])
 
 @usuario_router.post('/registrar')
-def registrar_usuario(usuario: Usuario, db_session: Session = Depends(get_db_session)):
+def registrar_usuario(usuario: UsuarioLogin, db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     uc.registrar_usuario_login(usuario=usuario)
     return JSONResponse(
