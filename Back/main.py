@@ -6,5 +6,5 @@ app = FastAPI()
 def home():
     return "Salve"
 
-app.include_router(usuario_router)
-app.include_router(test_router)
+app.include_router(router=usuario_router)
+app.include_router(router=test_router)
