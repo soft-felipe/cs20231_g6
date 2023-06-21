@@ -39,19 +39,19 @@ Esta API será construída pelos componentes do grupo 6:
 
 **COMO usuário, QUERO controlar o acesso ao meu projeto, PARA permitir que eu tenho controle de quem participa dele.**
 
-4. RF004 - Funcionalidade: Configurar fluxos de trabalho personalizados.
+4. RF003 - Funcionalidade: Configurar fluxos de trabalho personalizados.
 
 **COMO usuário, QUERO configurar fluxos de trabalho personalizados, PARA adequar o processo de trabalho ao meu projeto.**
 
-5. RF005 - Funcionalidade: Criar tarefas.
+5. RF004 - Funcionalidade: Criar tarefas.
 
 **COMO usuário, QUERO criar tarefas, PARA declarar as atividades que devem ser realizadas.**
 
-6. RF006 - Funcionalidade: Atualizar status de tarefas.
+6. RF005 - Funcionalidade: Atualizar status de tarefas.
 
 **COMO usuário, QUERO atualizar o status das tarefas do meu projeto, PARA acompanhar o progresso das atividades e ter uma visão geral do projeto.**
 
-7. RF007 - Funcionalidade: Visualizar tarefas.
+7. RF006 - Funcionalidade: Visualizar tarefas.
 
 **COMO usuário, QUERO visualizar as tarefas em seus respectivos estados mais recentes, PARA ter uma visão geral do projeto.**
 
