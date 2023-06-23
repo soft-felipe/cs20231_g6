@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from database.depends import get_db_session, token_verifier
+from depends import get_db_session, token_verifier
 from services.usuario_service import UsuarioLoginService
 from schemas import Usuario, UsuarioLogin
 import json
@@ -18,15 +18,6 @@ def registrar_usuario(usuario: UsuarioLogin, db_session: Session = Depends(get_d
     uc.registrar_usuario_login(usuario=usuario)
     return JSONResponse(
         content={'msg':"Usuario registrado com sucesso."},
-        status_code=status.HTTP_201_CREATED
-    )
-    
-@usuario_router.post('/registrar/{id}')
-def concluir_registro(usuario: Usuario, id: int, db_session: Session = Depends(get_db_session)):
-    uc = UsuarioLoginService(db_session=db_session)
-    uc.registrar_usuario(usuario=usuario, id=id)
-    return JSONResponse(
-        content={'msg':'Usuario cadastrado com sucesso.'},
         status_code=status.HTTP_201_CREATED
     )
     

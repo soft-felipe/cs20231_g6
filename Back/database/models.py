@@ -1,25 +1,22 @@
 from sqlalchemy import Column, String, Integer, Date, ForeignKey
-from sqlalchemy.orm import relationship
 from database.base import Base
 from sqlalchemy_serializer import SerializerMixin
 
 class UsuarioModel(Base, SerializerMixin):
     __tablename__ = 'usuario'
     
-    id = Column('id', Integer, primary_key=True, autoincrement=True)
-    data_nascimento = Column('data_nascimento', Date, nullable=False)
-    nome_completo = Column('nome_completo', String, nullable=False)
-    avatar = Column('avatar', String, nullable=True)
-    email = Column('email', String, nullable=False)
-    usuario_login_id = Column('usuario_login_id', Integer, ForeignKey('usuario_login.id'), unique=True)
-    login = relationship("UsuarioLoginModel", back_populates="usuario")
-    
+    id_usuario = Column('id_usuario', Integer, primary_key=True, autoincrement=True)
+    id_credencial = Column('id_credencial', Integer, ForeignKey('login.id_login'), nullable=True)
+    apelido = Column('apelido', String(30), nullable=True)
+    nome_completo = Column('nome_completo', String(255), nullable=True)
+    data_nasc = Column('data_nasc', Date, nullable=True)
+    avatar = Column('avatar', String(255), nullable=True)
+    data_criacao = Column('data_criacao', Date, nullable=True)
 
 class UsuarioLoginModel(Base, SerializerMixin):
-    __tablename__ = 'usuario_login'
+    __tablename__ = 'login'
     
-    id = Column('id', Integer, primary_key=True, autoincrement=True)
-    username = Column('username', String, nullable=False)
+    id_login = Column('id_login', Integer, primary_key=True, autoincrement=True)
+    username = Column('login', String, nullable=False)
     senha = Column('senha', String, nullable=False)
-    usuario = relationship("UsuarioModel", uselist=False, back_populates="login")
-
+    email = Column('email', String, nullable=True)

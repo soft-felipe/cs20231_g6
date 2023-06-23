@@ -24,7 +24,8 @@ class UsuarioLoginService:
     def registrar_usuario_login(self, usuario:UsuarioLogin):
         usuario_model = UsuarioLoginModel(
             username = usuario.username,
-            senha = crypt_context.hash(usuario.senha)
+            senha = crypt_context.hash(usuario.senha),
+            email = usuario.email
         )
         try:
             self.db_session.add(usuario_model)
@@ -35,30 +36,10 @@ class UsuarioLoginService:
                 status_code=status.HTTP_400_BAD_REQUEST
             )
     
-    
-    def registrar_usuario(self, usuario:Usuario, id:int):
-        usuario_login = self.db_session.query(UsuarioLoginModel).filter_by(id=id).first()
-        usuario_model = UsuarioModel(
-            data_nascimento = usuario.data_nascimento,
-            nome_completo = usuario.nome_completo,
-            email = usuario.email,
-            avatar = usuario.avatar,
-            login = usuario_login
-        )
-        
-        try:
-            self.db_session.add(usuario_model)
-            self.db_session.commit()
-        except Exception:
-            raise HTTPException(
-                detail="Erro ao registrar usuário",
-                status_code=status.HTTP_400_BAD_REQUEST
-            )
-        
     #todo    
     def listar_usuarios_login(self):
         try:
-            usuario_lista = self.db_session.query(UsuarioModel).all()
+            usuario_lista = self.db_session.query(UsuarioLoginModel).all()
             return usuario_lista
         except:
             raise HTTPException(
