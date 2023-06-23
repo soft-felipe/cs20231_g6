@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from depends import get_db_session, token_verifier
+from database.depends import get_db_session, token_verifier
 from services.usuario_service import UsuarioLoginService
-from schemas import Usuario, UsuarioLogin
+from model.usuario import Usuario, UsuarioLogin
 import json
 
 db_session: Session = Depends(get_db_session)

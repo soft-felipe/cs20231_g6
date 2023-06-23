@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database.models import UsuarioModel, UsuarioLoginModel
-from schemas import Usuario, UsuarioLogin
+from model.usuario import Usuario, UsuarioLogin
 from passlib.context import CryptContext
 from fastapi.exceptions import HTTPException
 from fastapi import status
