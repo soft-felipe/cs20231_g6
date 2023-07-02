@@ -2,16 +2,20 @@ from pydantic import BaseModel, validator, EmailStr
 import datetime
 import re
 
+
 class Usuario(BaseModel):
-    data_nascimento: datetime.date
+    data_nasc: datetime.date
     nome_completo: str
+    apelido: str
     avatar: str
-    
+    data_criacao = datetime.date
+
+
 class UsuarioLogin(BaseModel):
     username: str
-    email: EmailStr
     senha: str
-    
+    email: EmailStr
+
     @validator('username')
     def validar_username(cls, value):
         if not re.match('^([a-z]|[0-9]|@)+$', value):
