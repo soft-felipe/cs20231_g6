@@ -13,3 +13,11 @@ projects = [
 ]
 
 ```
+### Rodando local
+- Para rodar a API local será necessário o Python na versão >= 3.10.x
+- Com o Python instalado, devemos instalar também o PIP para instalação de dependências do Python.
+- Com ambos instalados, iremos instalar o Poetry: ```pip install poetry```
+- Criar novo ambiente virtual: ```poetry env use python```
+- Entrar no ambiente virtual: ```poetry shell```
+- Instalar todas as dependências necessárias para o projeto: ```poetry install```
+- Rodar a API localmente: ```uvicorn main:app --reload```

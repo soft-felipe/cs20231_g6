@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "back"
+version = "0.1.0"
+description = ""
+authors = ["Lucas Bernardes <lucasbernardes24@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.95.1"
+uvicorn = "^0.22.0"
+sqlalchemy = "^2.0.12"
+psycopg2-binary = "^2.9.6"
+alembic = "^1.10.4"
+python-decouple = "^3.8"
+passlib = "^1.7.4"
+python-jose = "^3.3.0"
+python-multipart = "^0.0.6"
+pydantic = {extras = ["email"], version = "^1.10.7"}
+sqlalchemy-serializer = "^1.4.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,54 +1,96 @@
-import bcrypt
-from jwt import PyJWTError
-from jose import jwt
-
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from database.models import UsuarioModel, UsuarioLoginModel
+from schemas import Usuario, UsuarioLogin
+from passlib.context import CryptContext
+from fastapi.exceptions import HTTPException
+from fastapi import status
+from sqlalchemy.ext.declarative import DeclarativeMeta
+import json
+from jose import jwt, JWTError
+from datetime import datetime, timedelta
+from decouple import config
 
-from schemas import Board, User, UserIn_Pydantic, User_Pydantic
-from database.models import UserModel
 
+SECRET_KEY = config('SECRET_KEY')
+ALGORITHM = config('ALGORITHM')
+
+crypt_context = CryptContext(schemes=['sha256_crypt'])
 
 class UsuarioLoginService:
-    def __init__(self, db_session: Session = None):
+    def __init__(self, db_session:Session):
         self.db_session = db_session
 
-    def save_board(self, board: Board, user: User_Pydantic):
-        user_db = self.db_session.query(UserModel).filter_by(id=user.id).first()
-        user_db.board_data = board.json()
-        self.db_session.commit()
-
-    def create_user(self, user: UserIn_Pydantic):
-        hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
-        user_data = user.dict()
-        user_data['password_hash'] = hashed_password.decode('utf-8')
-        user_db = UserModel(**user_data)
-        self.db_session.add(user_db)
-        self.db_session.commit()
-
-        token = jwt.encode({"id": user_db.id}, "myjwtsecret")
-        return {'access_token': token, 'token_type': 'bearer'}
-
-    def generate_token(self, form_data):
-        username = form_data.username
-        password = form_data.password
-
-        user_db = self.db_session.query(UserModel).filter_by(username=username).first()
-        if not user_db or not bcrypt.checkpw(password.encode('utf-8'), user_db.password_hash.encode('utf-8')):
+    def registrar_usuario_login(self, usuario:UsuarioLogin):
+        usuario_model = UsuarioLoginModel(
+            username = usuario.username,
+            senha = crypt_context.hash(usuario.senha),
+            email = usuario.email
+        )
+        try:
+            self.db_session.add(usuario_model)
+            self.db_session.commit()
+        except IntegrityError:
+            raise HTTPException(
+                detail="Erro ao inserir usuario",
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+    
+    #todo    
+    def listar_usuarios_login(self):
+        try:
+            usuario_lista = self.db_session.query(UsuarioLoginModel).all()
+            return usuario_lista
+        except:
+            raise HTTPException(
+                detail="Erro ao buscar usuarios",
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+            
+            
+    def login_usuario(self, usuario:UsuarioLogin, expires_in: int = 60):
+        usuario_back = self.db_session.query(UsuarioLoginModel).filter_by(username=usuario.username).first()
+        
+        if usuario_back is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail='Invalid username or password'
+                detail='Username ou senha incorretos.'
             )
-
-        token = jwt.encode({"id": user_db.id}, "myjwtsecret")
-        return {'access_token': token, 'token_type': 'bearer'}
-
+            
+        if not crypt_context.verify(usuario.senha, usuario_back.senha):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='Username ou senha incorretos.' 
+            )
+            
+        exp = datetime.utcnow() + timedelta(minutes=expires_in)
+        
+        payload = {
+            'sub' : usuario.username,
+            'exp' : exp
+        }
+        
+        access_token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+        
+        return {
+            'access_token' : access_token,
+            'exp' : exp.isoformat()
+        }
+    
     def verify_token(self, access_token):
         try:
-            payload = jwt.decode(access_token, "myjwtsecret")
-            user = self.db_session.query(UserModel).filter_by(id=payload.get('id')).first()
-            return User_Pydantic.from_orm(user)
-        except PyJWTError:
+            data = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
+        except JWTError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail='Invalid token'
+                detail='Token de acesso invalido.'
+            )
+        
+        
+        usuario_back = self.db_session.query(UsuarioLoginModel).filter_by(username=data['sub']).first()
+        
+        if usuario_back is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='Token de acesso invalido.'
             )

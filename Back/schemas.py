@@ -1,42 +1,44 @@
-from pydantic import BaseModel
-from typing import Dict, List
+from pydantic import BaseModel, validator, EmailStr
+import datetime
+import re
 
 
-class Task(BaseModel):
-    id: str
-    content: str
+class Usuario(BaseModel):
+    data_nasc: datetime.date
+    nome_completo: str
+    apelido: str
+    avatar: str
+    data_criacao = datetime.date
 
 
-class Tasks(BaseModel):
-    __root__: Dict[str, Task]
-
-
-class Column(BaseModel):
-    id: str
-    title: str
-    taskIds: List[str]
-
-
-class Columns(BaseModel):
-    __root__: Dict[str, Column]
-
-
-class Board(BaseModel):
-    tasks: Tasks
-    columns: Columns
-    columnOrder: List[str]
-
-
-class UserBase(BaseModel):
+class UsuarioLogin(BaseModel):
     username: str
+    senha: str
+    email: EmailStr
+
+    @validator('username')
+    def validar_username(cls, value):
+        if not re.match('^([a-z]|[0-9]|@)+$', value):
+            raise ValueError('Formato invalido de nome de usuario')
+        return value
+
+class Projeto(BaseModel):
+    nome: str
 
 
-class UserCreate(UserBase):
-    password: str
+class Etapa(BaseModel):
+    titulo: str
+    index: int
 
 
-class User(UserBase):
-    id: int
+class Tarefa(BaseModel):
+    titulo: str
+    descricao: str
+    criacao: datetime.date
+    limite: datetime.date
+    pontuacao: int
+    prioridade: int
 
-    class Config:
-        orm_mode = True
+
+class Comentario(BaseModel):
+    descricao: str
