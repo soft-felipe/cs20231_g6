@@ -26,21 +26,26 @@ class UsuarioLogin(BaseModel):
 class Projeto(BaseModel):
     nome: str
     # não tenho certeza se é assim que se faz '-'
-    etapas: List[Etapa] = []
-
-class Etapa(BaseModel):
-    titulo: str
-    index: int
-
-
-class Tarefa(BaseModel):
-    titulo: str
-    descricao: str
-    criacao: datetime.date
-    limite: datetime.date
-    pontuacao: int
-    prioridade: int
-
+    etapas: List[Etapa]
 
 class Comentario(BaseModel):
+    id: int
     descricao: str
+
+class Tarefa(BaseModel):
+    id: int
+    titulo: str
+    descricao: str
+    pontuacao: int
+    prioridade: int
+    comentarios: List[Comentario]
+   
+class Etapa(BaseModel):
+    id: int
+    titulo: str
+    tarefas: List[Tarefa]
+
+class Projeto(BaseModel):
+    id: int
+    nome: str
+    etapas: List[Etapa]
