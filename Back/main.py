@@ -9,7 +9,4 @@ def home():
     return "Salve"
 
 app.include_router(router=usuario_router)
-app.include_router(router=projeto_router)
-app.include_router(router=etapa_router)
-app.include_router(router=tarefa_router)
-app.include_router(router=comentario_router)    
+app.include_router(router=projeto_router) 
