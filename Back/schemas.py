@@ -1,6 +1,7 @@
 from pydantic import BaseModel, validator, EmailStr
 import datetime
 import re
+from typing import List
 
 
 class Usuario(BaseModel):
@@ -24,7 +25,8 @@ class UsuarioLogin(BaseModel):
 
 class Projeto(BaseModel):
     nome: str
-
+    # não tenho certeza se é assim que se faz '-'
+    etapas: List[Etapa] = []
 
 class Etapa(BaseModel):
     titulo: str
