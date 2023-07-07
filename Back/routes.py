@@ -6,22 +6,36 @@ from depends import get_db_session, token_verifier
 from services.usuario_service import UsuarioLoginService
 from schemas import Usuario, UsuarioLogin, Projeto, Etapa, Tarefa, Comentario
 
-
 db_session: Session = Depends(get_db_session)
 
 usuario_router = APIRouter(prefix='/usuario')
 test_router = APIRouter(prefix='/teste', dependencies=[Depends(token_verifier)])
 projeto_router = APIRouter(prefix='/projeto')
 
-@usuario_router.post('/registrar')
-def registrar_usuario(usuario: UsuarioLogin, db_session: Session = Depends(get_db_session)):
+@usuario_router.post('/registrar-login')
+def registrar_login(usuario_login: UsuarioLogin, db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
-    uc.registrar_usuario_login(usuario=usuario)
+    id_usuario_login = uc.registrar_usuario_login(usuario=usuario_login)
     return JSONResponse(
-        content={'msg':"Usuario registrado com sucesso."},
+        content={
+            'msg': "Usuario registrado com sucesso.",
+            'id_login': id_usuario_login
+        },
         status_code=status.HTTP_201_CREATED
     )
-    
+
+@usuario_router.post('/{id_login}/registrar-usuario')
+def registrar_usuario(id_login: int, usuario: Usuario, db_session: Session = Depends(get_db_session)):
+    uc = UsuarioLoginService(db_session=db_session)
+    id_usuario = uc.registrar_usuario(usuario=usuario, id_credencial=id_login)
+    return JSONResponse(
+        content={
+            'msg': "Informacoes do usuario registrado com sucesso.",
+            'id_usuario': id_usuario
+        },
+        status_code=status.HTTP_200_OK
+    )
+
 @usuario_router.get('/listar')
 def listar_usuarios(db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
@@ -33,23 +47,27 @@ def listar_usuarios(db_session: Session = Depends(get_db_session)):
         content=user_dict,
         status_code=status.HTTP_200_OK
     )
-    
+
+
 @usuario_router.post('/login')
-def login_usuario(request_form_usuario: OAuth2PasswordRequestForm = Depends(), db_session: Session = Depends(get_db_session)):
+def login_usuario(request_form_usuario: OAuth2PasswordRequestForm = Depends(),
+                  db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     usuario = UsuarioLogin(
         username=request_form_usuario.username,
-        senha=request_form_usuario.password 
+        senha=request_form_usuario.password
     )
     auth_data = uc.login_usuario(usuario=usuario)
     return JSONResponse(
         content=auth_data,
         status_code=status.HTTP_200_OK
     )
-    
+
+
 @test_router.get('/check')
 def teste_login():
     return "Logado"
+
 
 # Pra listarmos os projetos, precisamos de um usuário logado
 @projeto_router.get('/listar')
@@ -109,6 +127,7 @@ def listar_projetos(db_session: Session = Depends(get_db_session), usuario: Usua
         status_code=status.HTTP_200_OK
     )
 
+
 # Criar um projeto específico pra um usuário logado
 @projeto_router.post('/{usuario_id}/projetos', status_code=status.HTTP_201_CREATED)
 def criar_projeto(usuario_id: int, projeto: Projeto, db_session: Session = Depends(get_db_session)):
@@ -132,9 +151,11 @@ def criar_projeto(usuario_id: int, projeto: Projeto, db_session: Session = Depen
         status_code=status.HTTP_201_CREATED
     )
 
+
 # Endpoint para pegar no front-end os dados das etapas de um projeto específico para fornecer aos cards de projetos na página inicial
 @projeto_router.get('/{projeto_id}/etapas')
-def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session), usuario: Usuario = Depends(get_db_session)):
+def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session),
+                  usuario: Usuario = Depends(get_db_session)):
     # Lógica para listar as etapas de um projeto específico
     projeto = db_session.query(Projeto).filter(Projeto.id == projeto_id, Projeto.usuario_id == usuario.id).first()
 
@@ -159,6 +180,7 @@ def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)
         content=etapas_dict,
         status_code=status.HTTP_200_OK
     )
+
 
 # Endpoint para pegar no front-end os dados das tarefas de um projeto específico para fornecer aos cards de projetos na página inicial
 @projeto_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas')
@@ -199,6 +221,7 @@ def listar_tarefas(projeto_id: int, etapa_id: int, db_session: Session = Depends
         content=tarefas_dict,
         status_code=status.HTTP_200_OK
     )
+
 
 # Endpoint para pegar no front-end os dados dos comentários de um projeto específico para fornecer aos cards de projetos na página inicial
 @projeto_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas/{tarefa_id}/comentarios')
@@ -243,6 +266,7 @@ def listar_comentarios(projeto_id: int, etapa_id: int, tarefa_id: int, db_sessio
         status_code=status.HTTP_200_OK
     )
 
+
 # Endpoint para postar um comentário em uma tarefa específica
 @projeto_router.post('/{tarefa_id}/comentar')
 def adicionar_comentario(tarefa_id: int, comentario: Comentario, db_session: Session = Depends(get_db_session)):
@@ -268,9 +292,11 @@ def adicionar_comentario(tarefa_id: int, comentario: Comentario, db_session: Ses
         status_code=status.HTTP_201_CREATED
     )
 
+
 # Endpoint para editar um comentário em uma tarefa específica
 @projeto_router.put('/{tarefa_id}/comentarios/{comentario_id}')
-def modificar_comentario(tarefa_id: int, comentario_id: int, comentario: Comentario, db_session: Session = Depends(get_db_session)):
+def modificar_comentario(tarefa_id: int, comentario_id: int, comentario: Comentario,
+                         db_session: Session = Depends(get_db_session)):
     # Lógica para modificar um comentário em uma tarefa específica
     tarefa = db_session.query(Tarefa).filter(Tarefa.id == tarefa_id).first()
 
@@ -280,7 +306,8 @@ def modificar_comentario(tarefa_id: int, comentario_id: int, comentario: Comenta
             status_code=status.HTTP_404_NOT_FOUND
         )
 
-    comentario_modificado = db_session.query(Comentario).filter(Comentario.id == comentario_id, Comentario.tarefa_id == tarefa_id).first()
+    comentario_modificado = db_session.query(Comentario).filter(Comentario.id == comentario_id,
+                                                                Comentario.tarefa_id == tarefa_id).first()
 
     if not comentario_modificado:
         return JSONResponse(
@@ -296,6 +323,7 @@ def modificar_comentario(tarefa_id: int, comentario_id: int, comentario: Comenta
         status_code=status.HTTP_200_OK
     )
 
+
 # Endpoint para excluir um comentário em uma tarefa específica
 @projeto_router.delete('/{tarefa_id}/comentarios/{comentario_id}')
 def remover_comentario(tarefa_id: int, comentario_id: int, db_session: Session = Depends(get_db_session)):
@@ -308,7 +336,8 @@ def remover_comentario(tarefa_id: int, comentario_id: int, db_session: Session =
             status_code=status.HTTP_404_NOT_FOUND
         )
 
-    comentario_removido = db_session.query(Comentario).filter(Comentario.id == comentario_id, Comentario.tarefa_id == tarefa_id).first()
+    comentario_removido = db_session.query(Comentario).filter(Comentario.id == comentario_id,
+                                                              Comentario.tarefa_id == tarefa_id).first()
 
     if not comentario_removido:
         return JSONResponse(

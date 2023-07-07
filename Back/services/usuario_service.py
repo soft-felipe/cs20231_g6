@@ -22,19 +22,40 @@ class UsuarioLoginService:
         self.db_session = db_session
 
     def registrar_usuario_login(self, usuario:UsuarioLogin):
-        usuario_model = UsuarioLoginModel(
+        usuario_login_model = UsuarioLoginModel(
             username = usuario.username,
             senha = crypt_context.hash(usuario.senha),
             email = usuario.email
         )
         try:
-            self.db_session.add(usuario_model)
+            self.db_session.add(usuario_login_model)
             self.db_session.commit()
+            return usuario_login_model.id_login
         except IntegrityError:
             raise HTTPException(
-                detail="Erro ao inserir usuario",
+                detail="Erro ao inserir login do usuario",
                 status_code=status.HTTP_400_BAD_REQUEST
             )
+
+    def registrar_usuario(self, usuario:Usuario, id_credencial: int):
+        usuario_model = UsuarioModel(
+            id_credencial = id_credencial,
+            apelido = usuario.apelido,
+            nome_completo = usuario.nome_completo,
+            data_nasc = usuario.data_nasc,
+            avatar = usuario.avatar,
+        )
+
+        try:
+            self.db_session.add(usuario_model)
+            self.db_session.commit()
+            return usuario_model.id_usuario
+        except IntegrityError:
+            raise HTTPException(
+                detail="Erro ao inserir dados do usuario",
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
     
     #todo    
     def listar_usuarios_login(self):

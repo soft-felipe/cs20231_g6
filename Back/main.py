@@ -1,8 +1,7 @@
 from fastapi import FastAPI
-from routes import usuario_router, projeto_router, etapa_router, tarefa_router, comentario_router
+from routes import usuario_router, projeto_router
 
-def include_router(app):
-	app.include_router(general_pages_router)
+app = FastAPI()
 
 @app.get("/")
 def home():
