@@ -87,15 +87,16 @@ class UsuarioLoginService:
         exp = datetime.utcnow() + timedelta(minutes=expires_in)
         
         payload = {
-            'sub' : usuario.username,
-            'exp' : exp
+            'sub': usuario.username,
+            'exp': exp,
         }
         
         access_token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
         
         return {
-            'access_token' : access_token,
-            'exp' : exp.isoformat()
+            'access_token': access_token,
+            'exp': exp.isoformat(),
+            'id_login': usuario_back.id_login
         }
     
     def verify_token(self, access_token):

@@ -42,7 +42,11 @@ def listar_usuarios(db_session: Session = Depends(get_db_session)):
     usuarios = uc.listar_usuarios_login()
     user_dict = []
     for u in usuarios:
-        user_dict.append(u.to_dict())
+        infos_json = {
+            'id_login': u.id_login,
+            'email': u.email
+        }
+        user_dict.append(infos_json)
     return JSONResponse(
         content=user_dict,
         status_code=status.HTTP_200_OK

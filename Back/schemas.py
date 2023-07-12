@@ -13,7 +13,7 @@ class Usuario(BaseModel):
 class UsuarioLogin(BaseModel):
     username: str
     senha: str
-    email: EmailStr
+    email: EmailStr = Field(None)
 
     @validator('username')
     def validar_username(cls, value):
