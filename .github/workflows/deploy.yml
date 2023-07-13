@@ -26,4 +26,4 @@ jobs:
       
     - name: Execute post-deploy script
       run: |
-        ssh -i ${{ secrets.EC2_SSH_KEY }} -o StrictHostKeyChecking=no ubuntu@ec2-18-233-10-135.compute-1.amazonaws.com 'bash /home/ubuntu/post-deploy.sh'
+        ssh -i ${{ secrets.EC2_SSH_KEY }} -o StrictHostKeyChecking=no ubuntu@ec2-18-233-10-135.compute-1.amazonaws.com 'ls -la /home/ubuntu'
