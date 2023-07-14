@@ -1,5 +1,3 @@
-## TESTE DEPLOY ##
-
 ### cs_20236
 Repositório definido para a manutenção do controle de versão dos artefatos do projeto de construção de uma API Rest para:
 
