@@ -12,6 +12,8 @@ usuario_router = APIRouter(prefix='/usuario')
 test_router = APIRouter(prefix='/teste', dependencies=[Depends(token_verifier)])
 projeto_router = APIRouter(prefix='/projeto')
 
+#USUÁRIO
+
 @usuario_router.post('/registrar-login')
 def registrar_login(usuario_login: UsuarioLogin, db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
@@ -72,6 +74,7 @@ def login_usuario(request_form_usuario: OAuth2PasswordRequestForm = Depends(),
 def teste_login():
     return "Logado"
 
+#PROJETO
 
 # Pra listarmos os projetos, precisamos de um usuário logado
 @projeto_router.get('/listar')
@@ -156,6 +159,8 @@ def criar_projeto(usuario_id: int, projeto: Projeto, db_session: Session = Depen
     )
 
 
+#ETAPAS
+
 # Endpoint para pegar no front-end os dados das etapas de um projeto específico para fornecer aos cards de projetos na página inicial
 @projeto_router.get('/{projeto_id}/etapas')
 def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session),
@@ -185,6 +190,8 @@ def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)
         status_code=status.HTTP_200_OK
     )
 
+
+#TAREFAS
 
 # Endpoint para pegar no front-end os dados das tarefas de um projeto específico para fornecer aos cards de projetos na página inicial
 @projeto_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas')
@@ -226,6 +233,8 @@ def listar_tarefas(projeto_id: int, etapa_id: int, db_session: Session = Depends
         status_code=status.HTTP_200_OK
     )
 
+
+#COMENTÁRIOS
 
 # Endpoint para pegar no front-end os dados dos comentários de um projeto específico para fornecer aos cards de projetos na página inicial
 @projeto_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas/{tarefa_id}/comentarios')

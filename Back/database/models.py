@@ -23,3 +23,8 @@ class UsuarioModel(Base, SerializerMixin):
     nome_completo = Column('nome_completo', String(255))
     data_nasc = Column('data_nasc', Date)
     avatar = Column('avatar', String(255))
+
+class ProjetoModel(Base, SerializerMixin):
+    __tablename__ = 'projeto'
+    
+    
