@@ -24,7 +24,39 @@ class UsuarioModel(Base, SerializerMixin):
     data_nasc = Column('data_nasc', Date)
     avatar = Column('avatar', String(255))
 
+
 class ProjetoModel(Base, SerializerMixin):
     __tablename__ = 'projeto'
-    
-    
+
+    id_projeto = Column('id_projeto', Integer, primary_key=True, autoincrement=True)
+    id_criador = Column('id_criador', Integer, ForeignKey('usuario.id_usuario'))
+    nome = Column('nome', String(100))
+    descricao = Column('descricao', String(200))
+
+
+class EtapaModel(Base, SerializerMixin):
+    __tablename__ = 'etapa'
+
+    id_etapa = Column('id_etapa', Integer, primary_key=True, autoincrement=True)
+    id_projeto = Column('id_projeto', Integer, ForeignKey('projeto.id_projeto'))
+    nome = Column('nome', String(30))
+    # cor -> não precisamos disso por enquanto
+
+
+class TarefaModel(Base, SerializerMixin):
+    __tablename__ = 'tarefa'
+
+    id_tarefa = Column('id_tarefa', Integer, primary_key=True, autoincrement=True)
+    id_criador = Column('id_criador', Integer, ForeignKey('usuario.id_usuario'))
+    id_responsavel = Column('id_responsavel', Integer, ForeignKey('usuario.id_usuario'))
+    id_etapa = Column('id_etapa', Integer, ForeignKey('etapa.id_etapa'))
+    descricao = Column('descricao', String(200))
+
+
+class ComentarioModel(Base, SerializerMixin):
+    __tablename__ = 'comentario'
+
+    id_comentario = Column('id_comentario', Integer, primary_key=True, autoincrement=True)
+    id_criador = Column('id_criador', Integer, ForeignKey('usuario.id_usuario'))
+    id_tarefa = Column('id_tarefa', Integer, ForeignKey('tarefa.id_tarefa'))
+    descricao = Column('descricao', String(200))
