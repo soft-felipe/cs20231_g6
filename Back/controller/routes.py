@@ -2,9 +2,12 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from depends import get_db_session, token_verifier
+from database.depends import get_db_session, token_verifier
+
+from services.projeto_service import ProjetoService
 from services.usuario_service import UsuarioLoginService
-from schemas import Usuario, UsuarioLogin, Projeto, Etapa, Tarefa, Comentario
+from model.schemas import Usuario, UsuarioLogin, Projeto, Etapa, Tarefa, Comentario
+from database.models import UsuarioModel
 
 db_session: Session = Depends(get_db_session)
 
@@ -136,10 +139,10 @@ def listar_projetos(db_session: Session = Depends(get_db_session), usuario: Usua
 
 
 # Criar um projeto específico pra um usuário logado
-@projeto_router.post('/{usuario_id}/projetos', status_code=status.HTTP_201_CREATED)
+@projeto_router.post('/{usuario_id}/criar-projeto')
 def criar_projeto(usuario_id: int, projeto: Projeto, db_session: Session = Depends(get_db_session)):
     # Lógica para criar um novo projeto para o usuário específico
-    usuario = db_session.query(Usuario).filter(Usuario.id == usuario_id).first()
+    usuario = db_session.query(UsuarioModel).filter_by(id_usuario=usuario_id).first()
 
     if not usuario:
         return JSONResponse(
@@ -147,14 +150,14 @@ def criar_projeto(usuario_id: int, projeto: Projeto, db_session: Session = Depen
             status_code=status.HTTP_404_NOT_FOUND
         )
 
-    novo_projeto = Projeto(nome=projeto.nome)
-    usuario.projetos.append(novo_projeto)
-
-    db_session.add(novo_projeto)
-    db_session.commit()
+    ps = ProjetoService(db_session=db_session)
+    projeto_criado = ps.criar_projeto(projeto=projeto, id_usario=usuario_id)
 
     return JSONResponse(
-        content={'msg': f"Projeto '{projeto.nome}' criado com sucesso para o usuário {usuario_id}"},
+        content={
+            'msg': f"Projeto '{projeto_criado['nome']}' criado com sucesso para o usuário {usuario_id}",
+            'id_projeto': projeto_criado['id_projeto']
+        },
         status_code=status.HTTP_201_CREATED
     )
 
