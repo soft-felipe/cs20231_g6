@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import usuario_router, projeto_router
+from controller.routes import usuario_router, projeto_router
 
 app = FastAPI()
 
