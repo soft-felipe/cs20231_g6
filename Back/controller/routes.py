@@ -7,7 +7,7 @@ from database.depends import get_db_session, token_verifier
 from services.projeto_service import ProjetoService
 from services.usuario_service import UsuarioLoginService
 from model.schemas import Usuario, UsuarioLogin, Projeto, Etapa, Tarefa, Comentario
-from database.models import UsuarioModel
+from database.models import UsuarioModel, ProjetoModel
 
 db_session: Session = Depends(get_db_session)
 
@@ -80,7 +80,7 @@ def teste_login():
 #PROJETO
 
 # Pra listarmos os projetos, precisamos de um usuário logado
-@projeto_router.get('/listar')
+@projeto_router.get('/desenvolver')
 def listar_projetos(db_session: Session = Depends(get_db_session), usuario: Usuario = Depends(get_db_session)):
     # Buscar os projetos do usuário no banco de dados
     projetos = db_session.query(Projeto).filter(Projeto.usuario_id == usuario.id).all()
@@ -139,26 +139,47 @@ def listar_projetos(db_session: Session = Depends(get_db_session), usuario: Usua
 
 
 # Criar um projeto específico pra um usuário logado
-@projeto_router.post('/{usuario_id}/criar-projeto')
-def criar_projeto(usuario_id: int, projeto: Projeto, db_session: Session = Depends(get_db_session)):
+@projeto_router.post('/{id_usuario}/criar')
+def criar_projeto(id_usuario: int, projeto: Projeto, db_session: Session = Depends(get_db_session)):
     # Lógica para criar um novo projeto para o usuário específico
-    usuario = db_session.query(UsuarioModel).filter_by(id_usuario=usuario_id).first()
 
-    if not usuario:
-        return JSONResponse(
-            content={'error': 'Usuário não encontrado'},
-            status_code=status.HTTP_404_NOT_FOUND
-        )
+    us = UsuarioLoginService(db_session=db_session)
+    usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
+    if not usuario_existe:
+        return resposta
 
     ps = ProjetoService(db_session=db_session)
-    projeto_criado = ps.criar_projeto(projeto=projeto, id_usario=usuario_id)
+    projeto_criado = ps.criar_projeto(projeto=projeto, id_usario=id_usuario)
 
     return JSONResponse(
         content={
-            'msg': f"Projeto '{projeto_criado['nome']}' criado com sucesso para o usuário {usuario_id}",
+            'msg': f"Projeto '{projeto_criado['nome']}' criado com sucesso para o usuário {id_usuario}",
             'id_projeto': projeto_criado['id_projeto']
         },
         status_code=status.HTTP_201_CREATED
+    )
+
+#Listar os projetos que o usuário criou
+@projeto_router.post('/{id_usuario}/listar-criados')
+def listar_projetos(id_usuario: int, db_session: Session = Depends(get_db_session)):
+    us = UsuarioLoginService(db_session=db_session)
+    usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
+    if not usuario_existe:
+        return resposta
+
+    infos_projetos = []
+    projetos_criados = db_session.query(ProjetoModel).filter_by(id_criador=id_usuario).all()
+    for projeto_criado in projetos_criados:
+        info = {
+            'id_projeto': projeto_criado.id_projeto,
+            'nome': projeto_criado.nome,
+            'descricao': projeto_criado.descricao
+        }
+        infos_projetos.append(info)
+
+    return JSONResponse(
+        content=infos_projetos,
+        status_code=status.HTTP_200_OK
     )
 
 
