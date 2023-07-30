@@ -1,3 +1,5 @@
+import traceback
+
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
@@ -7,7 +9,7 @@ from database.depends import get_db_session, token_verifier
 from services.projeto_service import ProjetoService
 from services.usuario_service import UsuarioLoginService
 from model.schemas import Usuario, UsuarioLogin, Projeto, Etapa, Tarefa, Comentario
-from database.models import UsuarioModel, ProjetoModel
+from database.models import UsuarioModel, ProjetoModel, ViewInfosParticipantesProjetoModel
 
 db_session: Session = Depends(get_db_session)
 
@@ -15,12 +17,14 @@ usuario_router = APIRouter(prefix='/usuario')
 test_router = APIRouter(prefix='/teste', dependencies=[Depends(token_verifier)])
 projeto_router = APIRouter(prefix='/projeto')
 
-#USUÁRIO
 
-@usuario_router.post('/registrar-login')
+# -------- ROTAS PARA USUÁRIO -------- #
+
+@usuario_router.post('/cadastrar-login', summary="Cadastro de credenciais: login, senha, email")
 def registrar_login(usuario_login: UsuarioLogin, db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     id_usuario_login = uc.registrar_usuario_login(usuario=usuario_login)
+
     return JSONResponse(
         content={
             'msg': "Usuario registrado com sucesso.",
@@ -29,10 +33,12 @@ def registrar_login(usuario_login: UsuarioLogin, db_session: Session = Depends(g
         status_code=status.HTTP_201_CREATED
     )
 
-@usuario_router.post('/{id_login}/registrar-usuario')
+
+@usuario_router.post('/{id_login}/cadastrar-usuario', summary="Cadastro de informaçoes do usuario: nome, apelido, data nascimento")
 def registrar_usuario(id_login: int, usuario: Usuario, db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     id_usuario = uc.registrar_usuario(usuario=usuario, id_credencial=id_login)
+
     return JSONResponse(
         content={
             'msg': "Informacoes do usuario registrado com sucesso.",
@@ -41,17 +47,20 @@ def registrar_usuario(id_login: int, usuario: Usuario, db_session: Session = Dep
         status_code=status.HTTP_200_OK
     )
 
-@usuario_router.get('/listar')
+
+@usuario_router.get('/listar', summary="Listar todos os usuários cadastrados no banco")
 def listar_usuarios(db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     usuarios = uc.listar_usuarios_login()
     user_dict = []
+
     for u in usuarios:
         infos_json = {
             'id_login': u.id_login,
             'email': u.email
         }
         user_dict.append(infos_json)
+
     return JSONResponse(
         content=user_dict,
         status_code=status.HTTP_200_OK
@@ -59,8 +68,7 @@ def listar_usuarios(db_session: Session = Depends(get_db_session)):
 
 
 @usuario_router.post('/login')
-def login_usuario(request_form_usuario: OAuth2PasswordRequestForm = Depends(),
-                  db_session: Session = Depends(get_db_session)):
+def login_usuario(request_form_usuario: OAuth2PasswordRequestForm = Depends(), db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     usuario = UsuarioLogin(
         username=request_form_usuario.username,
@@ -72,12 +80,17 @@ def login_usuario(request_form_usuario: OAuth2PasswordRequestForm = Depends(),
         status_code=status.HTTP_200_OK
     )
 
+@usuario_router.post('/alterar-senha', summary="(IMPLEMENTAR) Alterar senha validando: senha atual, username e login")
+def alterar_senha_usuario(usuario_login: UsuarioLogin, db_session: Session = Depends(get_db_session)):
+    uc = UsuarioLoginService(db_session=db_session)
+
 
 @test_router.get('/check')
 def teste_login():
     return "Logado"
 
-#PROJETO
+
+# -------- ROTAS PARA PROJETO -------- #
 
 # Pra listarmos os projetos, precisamos de um usuário logado
 @projeto_router.get('/desenvolver')
@@ -138,30 +151,63 @@ def listar_projetos(db_session: Session = Depends(get_db_session), usuario: Usua
     )
 
 
-# Criar um projeto específico pra um usuário logado
-@projeto_router.post('/{id_usuario}/criar')
+@projeto_router.post('/{id_usuario}/criar', summary="Criar um projeto para um usuário passando seu ID")
 def criar_projeto(id_usuario: int, projeto: Projeto, db_session: Session = Depends(get_db_session)):
-    # Lógica para criar um novo projeto para o usuário específico
-
     us = UsuarioLoginService(db_session=db_session)
     usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
     if not usuario_existe:
         return resposta
 
-    ps = ProjetoService(db_session=db_session)
-    projeto_criado = ps.criar_projeto(projeto=projeto, id_usario=id_usuario)
+    try:
+        ps = ProjetoService(db_session=db_session)
+        projeto_criado = ps.criar_projeto(projeto=projeto, id_usario=id_usuario)
+        ps.relacionar_projeto_participante(id_projeto=projeto_criado['id_projeto'], id_participante=id_usuario)
+        db_session.commit()
+
+        return JSONResponse(
+            content={
+                'msg': f"Projeto '{projeto_criado['nome']}' criado com sucesso para o usuário {id_usuario}",
+                'id_projeto': projeto_criado['id_projeto']
+            },
+            status_code=status.HTTP_201_CREATED
+        )
+    except Exception as e:
+        traceback.print_exc()
+        db_session.rollback()
+        return JSONResponse(
+            content={
+                'msg': 'Erro ao criar projeto e relacionar projeto-participante'
+            },
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@projeto_router.post('/{id_usario}/listar', summary="Listar projetos que o usuário participa")
+def listar_projetos(id_usuario: int, db_session: Session = Depends(get_db_session)):
+    us = UsuarioLoginService(db_session=db_session)
+    usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
+    if not usuario_existe:
+        return resposta
+
+    infos_projetos = []
+    projetos_participantes = db_session.query(ViewInfosParticipantesProjetoModel).filter_by(
+        id_participante=id_usuario).all()
+    for projeto_criado in projetos_participantes:
+        info = {
+            'id_projeto': projeto_criado.id_projeto,
+            'nome_projeto': projeto_criado.nome_projeto,
+            'email': projeto_criado.email
+        }
+        infos_projetos.append(info)
 
     return JSONResponse(
-        content={
-            'msg': f"Projeto '{projeto_criado['nome']}' criado com sucesso para o usuário {id_usuario}",
-            'id_projeto': projeto_criado['id_projeto']
-        },
-        status_code=status.HTTP_201_CREATED
+        content=infos_projetos,
+        status_code=status.HTTP_200_OK
     )
 
-#Listar os projetos que o usuário criou
-@projeto_router.post('/{id_usuario}/listar-criados')
-def listar_projetos(id_usuario: int, db_session: Session = Depends(get_db_session)):
+
+@projeto_router.post('/{id_usuario}/listar-criados', summary="Listar os projetos que o usuário criou")
+def listar_projetos_criados(id_usuario: int, db_session: Session = Depends(get_db_session)):
     us = UsuarioLoginService(db_session=db_session)
     usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
     if not usuario_existe:
@@ -183,7 +229,7 @@ def listar_projetos(id_usuario: int, db_session: Session = Depends(get_db_sessio
     )
 
 
-#ETAPAS
+# ETAPAS
 
 # Endpoint para pegar no front-end os dados das etapas de um projeto específico para fornecer aos cards de projetos na página inicial
 @projeto_router.get('/{projeto_id}/etapas')
@@ -215,7 +261,7 @@ def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)
     )
 
 
-#TAREFAS
+# TAREFAS
 
 # Endpoint para pegar no front-end os dados das tarefas de um projeto específico para fornecer aos cards de projetos na página inicial
 @projeto_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas')
@@ -258,7 +304,7 @@ def listar_tarefas(projeto_id: int, etapa_id: int, db_session: Session = Depends
     )
 
 
-#COMENTÁRIOS
+# COMENTÁRIOS
 
 # Endpoint para pegar no front-end os dados dos comentários de um projeto específico para fornecer aos cards de projetos na página inicial
 @projeto_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas/{tarefa_id}/comentarios')

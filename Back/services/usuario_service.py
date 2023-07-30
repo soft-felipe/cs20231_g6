@@ -6,7 +6,6 @@ from passlib.context import CryptContext
 from fastapi.exceptions import HTTPException
 from fastapi import status
 from fastapi.responses import JSONResponse
-import json
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from decouple import config
@@ -56,7 +55,6 @@ class UsuarioLoginService:
                 status_code=status.HTTP_400_BAD_REQUEST
             )
 
-    # todo
     def listar_usuarios_login(self):
         try:
             usuario_lista = self.db_session.query(UsuarioLoginModel).all()
@@ -73,13 +71,13 @@ class UsuarioLoginService:
         if usuario_back is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail='Username ou senha incorretos.'
+                detail='Usuário ou senha incorretos.'
             )
 
         if not crypt_context.verify(usuario.senha, usuario_back.senha):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail='Username ou senha incorretos.'
+                detail='Usuário ou senha incorretos.'
             )
 
         exp = datetime.utcnow() + timedelta(minutes=expires_in)
