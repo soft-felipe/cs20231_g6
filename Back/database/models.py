@@ -60,3 +60,25 @@ class ComentarioModel(Base, SerializerMixin):
     id_criador = Column('id_criador', Integer, ForeignKey('usuario.id_usuario'))
     id_tarefa = Column('id_tarefa', Integer, ForeignKey('tarefa.id_tarefa'))
     descricao = Column('descricao', String(200))
+
+
+class ProjetoParticipanteModel(Base, SerializerMixin):
+    __tablename__ = 'projeto_participante'
+
+    id_projeto_participante = Column('id_projeto_participante', Integer, primary_key=True, autoincrement=True)
+    id_projeto = Column('id_projeto', Integer)
+    id_participante = Column('id_participante', Integer)
+
+
+# MODELS DAS VIEWS (SELECTS COM JOINS)
+
+class ViewInfosParticipantesProjetoModel(Base, SerializerMixin):
+    __tablename__ = 'infos_participantes_projetos'
+
+    id_projeto = Column('id_projeto', Integer, primary_key=True)
+    id_participante = Column('id_participante', Integer)
+    nome_projeto = Column('nome_projeto', String(100))
+    apelido_participante = Column('apelido_participante', String(30))
+    nome_completo_participante = Column('nome_completo_participante', String(255))
+    data_nasc = Column('data_nasc', Date)
+    email = Column('email', String)

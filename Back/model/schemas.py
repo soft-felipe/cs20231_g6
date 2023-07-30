@@ -28,6 +28,11 @@ class Projeto(BaseModel):
     descricao: str
 
 
+class ProjetoParticipantes(BaseModel):
+    id_projeto: int
+    id_participante: int
+
+
 class Comentario(BaseModel):
     id: int
     id_criador: int
