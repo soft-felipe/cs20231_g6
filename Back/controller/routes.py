@@ -163,6 +163,18 @@ def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)
             content=etapas_dict,
             status_code=status.HTTP_200_OK
         )
+    
+@projeto_router.post('/{projeto_id}/etapas', summary="(IMPLEMENTAR) ADICIONAR NOVA ETAPA")
+def adicionar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)):
+    ps = ProjetoService(db_session=db_session)
+
+@projeto_router.put('/{projeto_id}/etapas/{etapa_id}', summary="(IMPLEMENTAR) EDITAR ETAPA EXISTENTE")
+def editar_etapa(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
+    ps = ProjetoService(db_session=db_session)
+
+@projeto_router.delete('/{projeto_id}/etapas/{etapa_id}', summary="(IMPLEMENTAR) EXCLUIR ETAPA EXISTENTE")
+def excluir_etapa(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
+    ps = ProjetoService(db_session=db_session)
 
 
 # TAREFAS
@@ -182,6 +194,17 @@ def listar_tarefas(projeto_id: int, etapa_id: int, db_session: Session = Depends
             status_code=status.HTTP_200_OK
         )
 
+@projeto_router.post('/{projeto_id}/etapas/{etapa_id}/tarefas', summary="(IMPLEMENTAR) ADICIONAR NOVA TAREFA")
+def adicinar_tarefa(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
+    ps = ProjetoService(db_session=db_session)
+
+@projeto_router.put('/{projeto_id}/etapas/{etapa_id}/tarefas/{tarefa_id}', summary="(IMPLEMENTAR) EDITAR TAREFA EXISTENTE")
+def editar_etapa(projeto_id: int, etapa_id: int, tarefa_id:int, db_session: Session = Depends(get_db_session)):
+    ps = ProjetoService(db_session=db_session)
+
+@projeto_router.delete('/{projeto_id}/etapas/{id_etapa}', summary="(IMPLEMENTAR) EXCLUIR TAREFA EXISTENTE")
+def excluir_etapa(projeto_id: int, etapa_id: int, tarefa_id:int, db_session: Session = Depends(get_db_session)):
+    ps = ProjetoService(db_session=db_session)
 
 # COMENTÁRIOS
 
