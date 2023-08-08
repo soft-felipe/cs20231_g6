@@ -58,7 +58,16 @@ class UsuarioLoginService:
     def listar_usuarios_login(self):
         try:
             usuario_lista = self.db_session.query(UsuarioLoginModel).all()
-            return usuario_lista
+            user_dict = []
+
+            for u in usuario_lista:
+                infos_json = {
+                    'id_login': u.id_login,
+                    'email': u.email
+                }
+                user_dict.append(infos_json)
+
+            return user_dict
         except:
             raise HTTPException(
                 detail="Erro ao buscar usuarios",
