@@ -95,6 +95,36 @@ def listar_projetos(db_session: Session = Depends(get_db_session), usuario: Usua
         status_code=status.HTTP_200_OK
     )
 
+@projeto_router.get('/{id_usario}/listar', summary="Listar projetos que o usuário participa")
+def listar_projetos(id_usuario: int, db_session: Session = Depends(get_db_session)):
+    us = UsuarioLoginService(db_session=db_session)
+    usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
+    if not usuario_existe:
+        return resposta
+
+    ps=ProjetoService(db_session=db_session)
+    infos_projetos = ps.listar_projetos_usuario(id_usuario=id_usuario)
+
+    return JSONResponse(
+        content=infos_projetos,
+        status_code=status.HTTP_200_OK
+    )
+
+
+@projeto_router.get('/{id_usuario}/listar-criados', summary="Listar os projetos que o usuário criou")
+def listar_projetos_criados(id_usuario: int, db_session: Session = Depends(get_db_session)):
+    us = UsuarioLoginService(db_session=db_session)
+    usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
+    if not usuario_existe:
+        return resposta
+
+    ps = ProjetoService(db_session=db_session)
+    infos_projetos = ps.listar_projetos_criados_usuario(id_usuario=id_usuario)
+
+    return JSONResponse(
+        content=infos_projetos,
+        status_code=status.HTTP_200_OK
+    )
 
 @projeto_router.post('/{id_usuario}/criar', summary="Criar um projeto para um usuário passando seu ID")
 def criar_projeto(id_usuario: int, projeto: Projeto, db_session: Session = Depends(get_db_session)):
@@ -113,38 +143,14 @@ def criar_projeto(id_usuario: int, projeto: Projeto, db_session: Session = Depen
     else:
         return sucesso
     
-
-
-@projeto_router.post('/{id_usario}/listar', summary="Listar projetos que o usuário participa")
-def listar_projetos(id_usuario: int, db_session: Session = Depends(get_db_session)):
-    us = UsuarioLoginService(db_session=db_session)
-    usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
-    if not usuario_existe:
-        return resposta
-
-    ps=ProjetoService(db_session=db_session)
-    infos_projetos = ps.listar_projetos_usuario(id_usuario=id_usuario)
-
-    return JSONResponse(
-        content=infos_projetos,
-        status_code=status.HTTP_200_OK
-    )
-
-
-@projeto_router.post('/{id_usuario}/listar-criados', summary="Listar os projetos que o usuário criou")
-def listar_projetos_criados(id_usuario: int, db_session: Session = Depends(get_db_session)):
-    us = UsuarioLoginService(db_session=db_session)
-    usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
-    if not usuario_existe:
-        return resposta
-
+@projeto_router.put('/{projeto_id}', summary="(IMPLEMENTAR) EDITAR PROJETO")
+def editar_projeto(projeto_id: int, db_session: Session = Depends(get_db_session), usuario: Usuario = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
-    infos_projetos = ps.listar_projetos_criados_usuario(id_usuario=id_usuario)
 
-    return JSONResponse(
-        content=infos_projetos,
-        status_code=status.HTTP_200_OK
-    )
+@projeto_router.delete('/{projeto_id}', summary="(IMPLEMENTAR) EXCLUIR PROJETO")
+def excluir_projeto(projeto_id: int, db_session: Session = Depends(get_db_session), usuario: Usuario = Depends(get_db_session)):
+    ps = ProjetoService(db_session=db_session)
+
 
 
 # ETAPAS
