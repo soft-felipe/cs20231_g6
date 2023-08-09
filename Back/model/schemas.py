@@ -23,6 +23,13 @@ class UsuarioLogin(BaseModel):
         return value
 
 
+class UsuarioAlterarSenha(BaseModel):
+    username: str
+    senha_atual: str
+    nova_senha: str
+    email: EmailStr = Field(None)
+
+
 class Projeto(BaseModel):
     nome: str
     descricao: str
