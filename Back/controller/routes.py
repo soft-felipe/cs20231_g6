@@ -102,7 +102,7 @@ def listar_projetos(db_session: Session = Depends(get_db_session), usuario: Usua
         status_code=status.HTTP_200_OK
     )
 
-@projeto_router.get('/{id_usario}/listar', summary="Listar projetos que o usuário participa")
+@projeto_router.get('/{id_usuario}/listar', summary="Listar projetos que o usuário participa")
 def listar_projetos(id_usuario: int, db_session: Session = Depends(get_db_session)):
     us = UsuarioLoginService(db_session=db_session)
     usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
