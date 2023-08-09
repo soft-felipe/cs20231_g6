@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from model.schemas import Comentario, Projeto, Tarefa, Usuario,  Etapa
-from database.models import ProjetoModel, ProjetoParticipanteModel, ViewInfosParticipantesProjetoModel
+from database.models import ProjetoModel, ProjetoParticipanteModel, ViewInfosParticipantesProjetoModel, EtapaModel
 from fastapi import status
 from fastapi.exceptions import HTTPException
 
@@ -71,28 +71,27 @@ class ProjetoService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
-    def listar_etapas(self, projeto_id:int, usuario: Usuario):
+    def listar_etapas(self, projeto_id:int):
         # Lógica para listar as etapas de um projeto específico
-        projeto = self.db_session.query(Projeto).filter(Projeto.id == projeto_id, Projeto.usuario_id == usuario.id).first()
+        projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto = projeto_id).first()
 
         if not projeto:
             return None, JSONResponse(
-                content={'error': 'Projeto não encontrado ou não pertence ao usuário'},
+                content={'error': 'Projeto não encontrado'},
                 status_code=status.HTTP_404_NOT_FOUND
             )
 
-        etapas = self.db_session.query(Etapa).filter(Etapa.projeto_id == projeto.id).all()
+        etapas = self.db_session.query(EtapaModel).filter_by(id_projeto = projeto_id).all()
 
         etapas_dict = []
         for etapa in etapas:
             etapa_dict = {
-                'id': etapa.id,
-                'titulo': etapa.titulo,
-                'index': etapa.index
+                'id_etapa': etapa.id_etapa,
+                'nome': etapa.nome
             }
             etapas_dict.append(etapa_dict)
         
-        return etapas_dict, None
+        return etapas_dict
     
     def listar_projetos(self, usuario: Usuario):
         # Buscar os projetos do usuário no banco de dados

@@ -102,7 +102,7 @@ def listar_projetos(db_session: Session = Depends(get_db_session), usuario: Usua
         status_code=status.HTTP_200_OK
     )
 
-@projeto_router.get('/{id_usario}/listar', summary="Listar projetos que o usuário participa")
+@projeto_router.get('/{id_usuario}/listar', summary="Listar projetos que o usuário participa")
 def listar_projetos(id_usuario: int, db_session: Session = Depends(get_db_session)):
     us = UsuarioLoginService(db_session=db_session)
     usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
@@ -163,19 +163,15 @@ def excluir_projeto(projeto_id: int, db_session: Session = Depends(get_db_sessio
 # ETAPAS
 
 # Endpoint para pegar no front-end os dados das etapas de um projeto específico para fornecer aos cards de projetos na página inicial
-@projeto_router.get('/{projeto_id}/etapas')
-def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session), usuario: Usuario = Depends(get_db_session)):
+@projeto_router.get('/{projeto_id}/etapas', summary="Listar as etapas de um projeto")
+def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
-    etapas_dict, repostaJSON = ps.listar_etapas(projeto_id=projeto_id, usuario=usuario)
+    etapas_dict = ps.listar_etapas(projeto_id=projeto_id)
 
-    if etapas_dict is None:
-        return repostaJSON
-
-    else: 
-        return JSONResponse(
-            content=etapas_dict,
-            status_code=status.HTTP_200_OK
-        )
+    return JSONResponse(
+        content=etapas_dict,
+        status_code=status.HTTP_200_OK
+    )
     
 @projeto_router.post('/{projeto_id}/etapas', summary="(IMPLEMENTAR) ADICIONAR NOVA ETAPA")
 def adicionar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)):
