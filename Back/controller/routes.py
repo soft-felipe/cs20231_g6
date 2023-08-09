@@ -8,7 +8,7 @@ from database.depends import get_db_session, token_verifier
 
 from services.projeto_service import ProjetoService
 from services.usuario_service import UsuarioLoginService
-from model.schemas import Usuario, UsuarioLogin, Projeto, Etapa, Tarefa, Comentario
+from model.schemas import Usuario, UsuarioLogin, Projeto, Etapa, Tarefa, Comentario, UsuarioAlterarSenha
 from database.models import UsuarioModel, ProjetoModel, ViewInfosParticipantesProjetoModel
 
 db_session: Session = Depends(get_db_session)
@@ -80,9 +80,16 @@ def login_usuario(request_form_usuario: OAuth2PasswordRequestForm = Depends(), d
         status_code=status.HTTP_200_OK
     )
 
-@usuario_router.post('/alterar-senha', summary="(IMPLEMENTAR) Alterar senha validando: senha atual, username e login")
-def alterar_senha_usuario(usuario_login: UsuarioLogin, db_session: Session = Depends(get_db_session)):
+
+@usuario_router.post('/{id_usuario}/alterar-senha', summary="Alterar senha validando: senha atual, username e login")
+def alterar_senha_usuario(id_usuario: int, usuario_alterar_senha: UsuarioAlterarSenha, db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
+    usuario_atualizado = uc.valida_senha_email(id_usuario=id_usuario, usuario_alterar_senha=usuario_alterar_senha)
+
+    return JSONResponse(
+        content=f'Senha do usuario {usuario_atualizado.username} foi atualizada!',
+        status_code=status.HTTP_200_OK
+    )
 
 
 @test_router.get('/check')

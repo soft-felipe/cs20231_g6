@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database.models import UsuarioModel, UsuarioLoginModel
-from model.schemas import Usuario, UsuarioLogin
+from model.schemas import Usuario, UsuarioLogin, UsuarioAlterarSenha
 from passlib.context import CryptContext
 from fastapi.exceptions import HTTPException
 from fastapi import status
@@ -121,3 +121,23 @@ class UsuarioLoginService:
             )
 
         return True, None
+
+
+    def obtem_id_credencial(self, id_usuario: int):
+        usuario_back = self.db_session.query(UsuarioModel).filter_by(id_usuario=id_usuario).first()
+        return usuario_back.id_credencial
+
+    def valida_senha_email(self, id_usuario: int, usuario_alterar_senha: UsuarioAlterarSenha):
+        id_credencial = self.obtem_id_credencial(id_usuario=id_usuario)
+        login_back = self.db_session.query(UsuarioLoginModel).filter_by(id_login=id_credencial).first()
+
+        if not crypt_context.verify(usuario_alterar_senha.senha_atual, login_back.senha) or usuario_alterar_senha.email != login_back.email:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='Email ou senha incorretos.'
+            )
+
+        login_back.senha = crypt_context.hash(usuario_alterar_senha.nova_senha)
+        self.db_session.commit()
+        self.db_session.refresh(login_back)
+        return login_back
