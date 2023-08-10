@@ -35,21 +35,30 @@ class EtapaService:
         
         etapa_model = EtapaModel(
             id_projeto = projeto_id,
-            nome = etapa.nome
+            nome = etapa.titulo
         )
         
         try:
             self.db_session.add(etapa_model)
             self.db_session.flush()
+            self.db_session.commit()
             return etapa_model.id_etapa
         except Exception:
             traceback.print_exc()
             self.db_session.rollback()
-            raise ErroAoInserirEtapaException(f"Não foi possível inserir a etapa '{etapa.nome}' no projeto '{projeto_id}'")
+            raise ErroAoInserirEtapaException(f"Não foi possível inserir a etapa '{etapa.titulo}' no projeto '{projeto_id}'")
 
 
 class ProjetoNaoEncontradoException(Exception):
-    pass
+    def __init__ (self, mensagem):
+        self.mensagem = mensagem
+        
+    def getMensagem(self):
+        return self.mensagem
 
 class ErroAoInserirEtapaException(Exception):
-    pass
+    def __init__ (self, mensagem):
+        self.mensagem = mensagem
+        
+    def getMensagem(self):
+        return self.mensagem

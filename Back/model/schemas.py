@@ -57,6 +57,4 @@ class Tarefa(BaseModel):
 
 
 class Etapa(BaseModel):
-    id: int
     titulo: str
-    tarefas: List[Tarefa]

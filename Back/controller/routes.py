@@ -183,30 +183,30 @@ def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)
     
 @projeto_router.post('/{projeto_id}/etapa', summary="Adiciona uma nova etapa")
 def adicionar_etapas(projeto_id: int, etapa: Etapa, db_session: Session = Depends(get_db_session)):
-    etapaService = EtapaService(db_session=db_session)
+    etapa_service = EtapaService(db_session=db_session)
     
     try:
-        id_etapa = etapaService.criar_etapa(projeto_id=projeto_id, etapa=etapa)
+        id_etapa = etapa_service.criar_etapa(projeto_id=projeto_id, etapa=etapa)
         
         return JSONResponse(
             content={
-                'msg': f"Etapa '{etapa.nome}' criada com sucesso no projeto '{projeto_id}'",
+                'msg': f"Etapa '{etapa.titulo}' criada com sucesso no projeto '{projeto_id}'",
                 'id_etapa':  f"'{id_etapa}"
             },
             status_code=status.HTTP_201_CREATED
         )
-    except ProjetoNaoEncontradoException:
+    except ProjetoNaoEncontradoException as e:
         return JSONResponse(
             content={
-                'msg': f"'{ProjetoNaoEncontradoException}'"
+                'msg': f"{e.getMensagem()}"
             },
             status_code=status.HTTP_400_BAD_REQUEST
         )
         
-    except ErroAoInserirEtapaException:
+    except ErroAoInserirEtapaException as e:
        return JSONResponse(
             content={
-                'msg': f"'{ErroAoInserirEtapaException}'"
+                'msg': f"{e.getMensagem()}"
             },
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
