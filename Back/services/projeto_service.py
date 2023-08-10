@@ -412,7 +412,7 @@ class ProjetoService:
         self.db_session.commit()
 
         return JSONResponse(
-            content={'msg': f"Comentário {comentario_id} modificado na tarefa {tarefa_id}"},
+            content={'msg': "Comentário modificado com sucesso."},
             status_code=status.HTTP_200_OK
         ), None
     
@@ -431,7 +431,7 @@ class ProjetoService:
         self.db_session.commit()
 
         return JSONResponse(
-            content={'msg': f"Comentário {comentario_id} removido da tarefa {tarefa_id}"},
+            content={'msg': "Comentário removido com sucesso."},
             status_code=status.HTTP_200_OK
         ), None
     
