@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
 from model.schemas import Comentario, Projeto, AlterarInfoProjeto, Tarefa, Usuario,  Etapa
-from database.models import ComentarioModel, EtapaModel, ProjetoModel, ProjetoParticipanteModel, TarefaModel, ViewInfosParticipantesProjetoModel
+from database.models import ComentarioModel, EtapaModel, ProjetoModel, ProjetoParticipanteModel, TarefaModel, UsuarioModel, ViewInfosParticipantesProjetoModel
 from fastapi import status
 from fastapi.exceptions import HTTPException
 
@@ -91,8 +91,11 @@ class ProjetoService:
                 'nome': etapa.nome
             }
             etapas_dict.append(etapa_dict)
-        
-        return etapas_dict
+ 
+        return JSONResponse(
+            content=etapas_dict,
+            status_code=status.HTTP_200_OK
+        ), None
     
     def listar_projetos(self):
         # Buscar os projetos do usuário no banco de dados
@@ -220,8 +223,119 @@ class ProjetoService:
             }
             tarefas_dict.append(tarefa_dict)
         
-        return tarefas_dict, None
+        return JSONResponse(
+            content=tarefas_dict,
+            status_code=status.HTTP_200_OK
+        ), None
     
+    def adicionar_tarefa(self, projeto_id: int, etapa_id: int, tarefa: Tarefa):
+        projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto=projeto_id).first()
+        
+        if not projeto:
+            return None, JSONResponse(
+                content={'error': 'Projeto não encontrado'},
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+        
+        etapa = self.db_session.query(EtapaModel).filter_by(id_etapa = etapa_id).first()
+
+        if not etapa:
+            return None, JSONResponse(
+                content={'error': 'Etapa não encontrada'},
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+        
+        nova_tarefa = TarefaModel(
+            id_criador = tarefa.id_criador,
+            id_responsavel = tarefa.id_responsavel,
+            id_etapa = etapa_id,
+            descricao = tarefa.descricao
+        )
+
+        self.db_session.add(nova_tarefa)
+        self.db_session.commit()
+
+        return JSONResponse(
+            content={'msg': f"Nova tarefa adicionada à etapa {etapa_id}"},
+            status_code=status.HTTP_201_CREATED
+        ), None
+    
+    def editar_tarefa_descricao(self, tarefa_id:int, descricao:str):
+        tarefa = self.db_session.query(TarefaModel).filter_by(id_tarefa=tarefa_id).first()
+
+        if not tarefa:
+            return None, JSONResponse(
+                content={'error': 'Tarefa não encontrada'},
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+        
+        tarefa.descricao = descricao
+        self.db_session.commit()
+        
+        return JSONResponse(
+            content={'msg': "A descricao da tarefa foi modificada com sucesso"},
+            status_code=status.HTTP_200_OK
+        ), None
+
+    def editar_tarefa_responsavel(self, tarefa_id:int, id_responsavel:int):
+        tarefa = self.db_session.query(TarefaModel).filter_by(id_tarefa=tarefa_id).first()
+
+        if not tarefa:
+            return None, JSONResponse(
+                content={'error': 'Tarefa não encontrada'},
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+        
+        responsavel = self.db_session.query(UsuarioModel).filter_by(id_usuario=id_responsavel).first()
+
+        if not responsavel:
+            return None, JSONResponse(
+                content={'error': 'Usuário não encontrado'},
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
+        tarefa.id_responsavel = id_responsavel
+        self.db_session.commit()
+        
+        return JSONResponse(
+            content={'msg': "O usuário responsavel pela tarefa foi alterado."},
+            status_code=status.HTTP_200_OK
+        ), None
+
+    def excluir_tarefa(self, tarefa_id:int):
+        tarefa = self.db_session.query(TarefaModel).filter_by(id_tarefa=tarefa_id).first()
+
+        if not tarefa:
+            return None, JSONResponse(
+                content={'error': 'Tarefa não encontrada'},
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+        
+        comentarios = self.db_session.query(ComentarioModel).filter_by(id_tarefa = tarefa_id).all()
+
+        for comentario in comentarios:
+            try:
+                self.db_session.delete(comentario)
+            except(Exception):
+                self.db_session.rollback()
+                return None, JSONResponse(
+                    content={'error': 'Erro ao excluir tarefa'},
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+            
+        
+        self.db_session.delete(tarefa)
+        self.db_session.commit()
+
+        return JSONResponse(
+            content={'msg': "A tarefa foi excluída com sucesso."},
+            status_code=status.HTTP_200_OK
+        ), None
+
+        
+    
+
+    #COMENTARIOS  
     def listar_comentarios(self, projeto_id: int, etapa_id: int, tarefa_id: int):
         # Lógica para listar os comentários de uma tarefa específica
         projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto = projeto_id).first()
@@ -284,16 +398,8 @@ class ProjetoService:
             status_code=status.HTTP_201_CREATED
         ), None
     
-    def editar_comentario(self, tarefa_id: int, comentario_id: int, comentario: str):
+    def editar_comentario(self, comentario_id: int, comentario: str):
         # Lógica para modificar um comentário em uma tarefa específica
-        tarefa = self.db_session.query(TarefaModel).filter_by(id_tarefa=tarefa_id).first()
-
-        if not tarefa:
-            return None, JSONResponse(
-                content={'error': 'Tarefa não encontrada'},
-                status_code=status.HTTP_404_NOT_FOUND
-            )
-
         comentario_modificado = self.db_session.query(ComentarioModel).filter_by(id_comentario=comentario_id).first()
 
         if not comentario_modificado:
@@ -310,16 +416,9 @@ class ProjetoService:
             status_code=status.HTTP_200_OK
         ), None
     
-    def excluir_comentario(self, tarefa_id: int, comentario_id: int):
+    def excluir_comentario(self, comentario_id: int):
         # Lógica para remover um comentário de uma tarefa específica
-        tarefa = self.db_session.query(TarefaModel).filter_by(id_tarefa=tarefa_id).first()
-
-        if not tarefa:
-            return None, JSONResponse(
-                content={'error': 'Tarefa não encontrada'},
-                status_code=status.HTTP_404_NOT_FOUND
-            )
-
+        
         comentario_removido = self.db_session.query(ComentarioModel).filter_by(id_comentario = comentario_id).first()
 
         if not comentario_removido:

@@ -52,9 +52,7 @@ class Comentario(BaseModel):
 class Tarefa(BaseModel):
     id_criador: int
     id_responsavel: int
-    id_etapa: int
     descricao: str
-    comentarios: List[Comentario]
 
 
 class Etapa(BaseModel):

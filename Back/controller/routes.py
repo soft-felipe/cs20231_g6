@@ -13,14 +13,17 @@ from database.models import UsuarioModel, ProjetoModel, ViewInfosParticipantesPr
 
 db_session: Session = Depends(get_db_session)
 
-usuario_router = APIRouter(prefix='/usuario')
+usuario_router = APIRouter(prefix='/usuario', tags=['Usuario'])
 test_router = APIRouter(prefix='/teste', dependencies=[Depends(token_verifier)])
-projeto_router = APIRouter(prefix='/projeto')
+projeto_router = APIRouter(prefix='/projeto', tags=['Projeto'])
+etapa_router = APIRouter(prefix='/etapa', tags=['Etapa'])
+tarefas_router = APIRouter(prefix='/tarefas', tags=['Tarefa'])
+comentario_router = APIRouter(prefix='/comentario', tags=['Comentario'])
 
 
 # -------- ROTAS PARA USUÁRIO -------- #
 
-@usuario_router.post('/cadastrar-login', summary="Cadastro de credenciais: login, senha, email //TESTADO")
+@usuario_router.post('/cadastrar-login', summary="Cadastro de credenciais: login, senha, email ")
 def registrar_login(usuario_login: UsuarioLogin, db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     id_usuario_login = uc.registrar_usuario_login(usuario=usuario_login)
@@ -33,8 +36,7 @@ def registrar_login(usuario_login: UsuarioLogin, db_session: Session = Depends(g
         status_code=status.HTTP_201_CREATED
     )
 
-
-@usuario_router.post('/{id_login}/cadastrar-usuario', summary="Cadastro de informaçoes do usuario: nome, apelido, data nascimento //TESTADO")
+@usuario_router.post('/{id_login}/cadastrar-usuario', summary="Cadastro de informaçoes do usuario: nome, apelido, data nascimento")
 def registrar_usuario(id_login: int, usuario: Usuario, db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     id_usuario = uc.registrar_usuario(usuario=usuario, id_credencial=id_login)
@@ -47,8 +49,7 @@ def registrar_usuario(id_login: int, usuario: Usuario, db_session: Session = Dep
         status_code=status.HTTP_200_OK
     )
 
-
-@usuario_router.get('/listar', summary="Listar todos os usuários cadastrados no banco //TESTADO")
+@usuario_router.get('/listar', summary="Listar todos os usuários cadastrados no banco")
 def listar_usuarios(db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     user_dict = uc.listar_usuarios_login()
@@ -58,8 +59,7 @@ def listar_usuarios(db_session: Session = Depends(get_db_session)):
         status_code=status.HTTP_200_OK
     )
 
-
-@usuario_router.post('/login', summary='//TESTADO')
+@usuario_router.post('/login', summary='Rota para o usuario realizar login')
 def login_usuario(request_form_usuario: OAuth2PasswordRequestForm = Depends(), db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     usuario = UsuarioLogin(
@@ -72,6 +72,7 @@ def login_usuario(request_form_usuario: OAuth2PasswordRequestForm = Depends(), d
         status_code=status.HTTP_200_OK
     )
 
+#TODO LOGOUT?
 
 @usuario_router.post('/{id_usuario}/alterar-senha', summary="Alterar senha validando: senha atual, username e login")
 def alterar_senha_usuario(id_usuario: int, usuario_alterar_senha: UsuarioAlterarSenha, db_session: Session = Depends(get_db_session)):
@@ -84,6 +85,8 @@ def alterar_senha_usuario(id_usuario: int, usuario_alterar_senha: UsuarioAlterar
     )
 
 
+# -------- ROTAS PARA TESTE LOGIN -------- #
+
 @test_router.get('/check')
 def teste_login():
     return "Logado"
@@ -92,7 +95,7 @@ def teste_login():
 # -------- ROTAS PARA PROJETO -------- #
 
 # Pra listarmos os projetos, precisamos de um usuário logado
-@projeto_router.get('/desenvolver', summary='Lista todos os projetos //TESTADO')
+@projeto_router.get('/desenvolver', summary='Lista todos os projetos')
 def listar_projetos(db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
     projetos_dict = ps.listar_projetos()
@@ -102,7 +105,7 @@ def listar_projetos(db_session: Session = Depends(get_db_session)):
         status_code=status.HTTP_200_OK
     )
 
-@projeto_router.get('/{id_usuario}/listar', summary="Listar projetos que o usuário participa //TESTADO")
+@projeto_router.get('/{id_usuario}/listar', summary="Listar projetos que o usuário participa")
 def listar_projetos(id_usuario: int, db_session: Session = Depends(get_db_session)):
     us = UsuarioLoginService(db_session=db_session)
     usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
@@ -117,8 +120,7 @@ def listar_projetos(id_usuario: int, db_session: Session = Depends(get_db_sessio
         status_code=status.HTTP_200_OK
     )
 
-
-@projeto_router.get('/{id_usuario}/listar-criados', summary="Listar os projetos que o usuário criou //TESTADO")
+@projeto_router.get('/{id_usuario}/listar-criados', summary="Listar os projetos que o usuário crioU")
 def listar_projetos_criados(id_usuario: int, db_session: Session = Depends(get_db_session)):
     us = UsuarioLoginService(db_session=db_session)
     usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
@@ -133,8 +135,7 @@ def listar_projetos_criados(id_usuario: int, db_session: Session = Depends(get_d
         status_code=status.HTTP_200_OK
     )
 
-
-@projeto_router.post('/{id_usuario}/criar', summary="Criar um projeto para um usuário passando seu ID //TESTADO")
+@projeto_router.post('/{id_usuario}/criar', summary="Criar um projeto para um usuário passando seu ID")
 def criar_projeto(id_usuario: int, projeto: Projeto, db_session: Session = Depends(get_db_session)):
     us = UsuarioLoginService(db_session=db_session)
     usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
@@ -150,7 +151,6 @@ def criar_projeto(id_usuario: int, projeto: Projeto, db_session: Session = Depen
     
     else:
         return sucesso
-
 
 @projeto_router.put('/{id_projeto}/editar-nome', summary="Editar o nome do Projeto")
 def editar_projeto(projeto_id: int, novoValorCampo: AlterarInfoProjeto, db_session: Session = Depends(get_db_session)):
@@ -183,36 +183,36 @@ def excluir_projeto(projeto_id: int, db_session: Session = Depends(get_db_sessio
     )
 
 
-# ETAPAS
+# -------- ROTAS PARA ETAPAS -------- #
 
 # Endpoint para pegar no front-end os dados das etapas de um projeto específico para fornecer aos cards de projetos na página inicial
-@projeto_router.get('/{projeto_id}/etapas', summary="Listar as etapas de um projeto")
+@etapa_router.get('/{projeto_id}/etapas', summary="Listar as etapas de um projeto")
 def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
-    etapas_dict = ps.listar_etapas(projeto_id=projeto_id)
+    etapas_dict, repostaErro = ps.listar_etapas(projeto_id=projeto_id)
 
-    return JSONResponse(
-        content=etapas_dict,
-        status_code=status.HTTP_200_OK
-    )
+    if etapas_dict is None:
+        return repostaErro
+
+    else:
+        return etapas_dict
     
-@projeto_router.post('/{projeto_id}/etapas', summary="(IMPLEMENTAR) ADICIONAR NOVA ETAPA")
+@etapa_router.post('/{projeto_id}/etapas', summary="(IMPLEMENTAR) ADICIONAR NOVA ETAPA")
 def adicionar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
 
-@projeto_router.put('/{projeto_id}/etapas/{etapa_id}', summary="(IMPLEMENTAR) EDITAR ETAPA EXISTENTE")
+@etapa_router.put('/{projeto_id}/etapas/{etapa_id}', summary="(IMPLEMENTAR) EDITAR ETAPA EXISTENTE")
 def editar_etapa(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
 
-@projeto_router.delete('/{projeto_id}/etapas/{etapa_id}', summary="(IMPLEMENTAR) EXCLUIR ETAPA EXISTENTE")
+@etapa_router.delete('/{projeto_id}/etapas/{etapa_id}', summary="(IMPLEMENTAR) EXCLUIR ETAPA EXISTENTE")
 def excluir_etapa(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
 
 
-# TAREFAS
+# -------- ROTAS PARA TAREFAS -------- #
 
-# Endpoint para pegar no front-end os dados das tarefas de um projeto específico para fornecer aos cards de projetos na página inicial
-@projeto_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas', summary='Listar as tarefas de uma determindada etapa e projeto //TESTADO')
+@tarefas_router.get('/{projeto_id}/{etapa_id}', summary='Listar as tarefas de uma determindada etapa e projeto ')
 def listar_tarefas(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
     tarefas_dict, respostaJSON = ps.listar_tarefas(projeto_id=projeto_id, etapa_id=etapa_id)
@@ -221,27 +221,56 @@ def listar_tarefas(projeto_id: int, etapa_id: int, db_session: Session = Depends
         return respostaJSON
 
     else:
-        return JSONResponse(
-            content=tarefas_dict,
-            status_code=status.HTTP_200_OK
-        )
+        return tarefas_dict
 
-@projeto_router.post('/{projeto_id}/etapas/{etapa_id}/tarefas', summary="(IMPLEMENTAR) ADICIONAR NOVA TAREFA")
-def adicinar_tarefa(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
+@tarefas_router.post('/{projeto_id}/{etapa_id}', summary="Adicionar uma nova tarefa à uma etapa ")
+def adicinar_tarefa(projeto_id: int, etapa_id: int, tarefa: Tarefa, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
+    sucesso, falha = ps.adicionar_tarefa(projeto_id=projeto_id, etapa_id=etapa_id, tarefa=tarefa)
 
-@projeto_router.put('/{projeto_id}/etapas/{etapa_id}/tarefas/{tarefa_id}', summary="(IMPLEMENTAR) EDITAR TAREFA EXISTENTE")
-def editar_etapa(projeto_id: int, etapa_id: int, tarefa_id:int, db_session: Session = Depends(get_db_session)):
+    if sucesso is None:
+        return falha
+    
+    else: 
+        return sucesso
+
+@tarefas_router.put('/{tarefa_id}/descricao', summary="Editar descrição de uma tarefa existente ")
+def editar_tarefa_descricao(tarefa_id:int, descricao:str, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
+    sucesso, falha = ps.editar_tarefa_descricao(tarefa_id=tarefa_id, descricao=descricao)
 
-@projeto_router.delete('/{projeto_id}/etapas/{id_etapa}', summary="(IMPLEMENTAR) EXCLUIR TAREFA EXISTENTE")
-def excluir_etapa(projeto_id: int, etapa_id: int, tarefa_id:int, db_session: Session = Depends(get_db_session)):
+    if sucesso is None:
+        return falha
+    
+    else: 
+        return sucesso
+    
+@tarefas_router.put('/{tarefa_id}/responsavel', summary='Altera o responsavel pela tarefa existente ')
+def editar_tarefa_responsavel(tarefa_id:int, id_responsavel:int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
+    sucesso, falha = ps.editar_tarefa_responsavel(tarefa_id=tarefa_id, id_responsavel=id_responsavel)
 
-# COMENTÁRIOS
+    if sucesso is None:
+        return falha
+    
+    else: 
+        return sucesso
 
-# Endpoint para pegar no front-end os dados dos comentários de um projeto específico para fornecer aos cards de projetos na página inicial
-@projeto_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas/{tarefa_id}/comentarios', summary='Lista todos os comentarios //TESTADO')
+@tarefas_router.delete('/{tarefa_id}', summary="Exclui uma tarefa existente")
+def excluir_tarefa(tarefa_id:int, db_session: Session = Depends(get_db_session)):
+    ps = ProjetoService(db_session=db_session)
+    sucesso, falha = ps.excluir_tarefa(tarefa_id=tarefa_id)
+
+    if sucesso is None:
+        return falha
+    
+    else:
+        return sucesso
+
+
+# -------- ROTAS PARA COMENTARIOS -------- #
+
+@comentario_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas/{tarefa_id}/comentarios', summary='Lista todos os comentarios')
 def listar_comentarios(projeto_id: int, etapa_id: int, tarefa_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
     comentarios_dict, respostaJSON = ps.listar_comentarios(projeto_id=projeto_id, etapa_id=etapa_id, tarefa_id=tarefa_id)
@@ -255,9 +284,7 @@ def listar_comentarios(projeto_id: int, etapa_id: int, tarefa_id: int, db_sessio
             status_code=status.HTTP_200_OK
         )
 
-
-# Endpoint para postar um comentário em uma tarefa específica
-@projeto_router.post('/{tarefa_id}/comentar', summary='Adiciona um comentario a uma tarefa específica //TESTADO')
+@comentario_router.post('/tarefa/{tarefa_id}', summary='Adiciona um comentario a uma tarefa específica')
 def adicionar_comentario(tarefa_id: int, comentario: Comentario, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
     sucesso, falha = ps.adicionar_comentario(tarefa_id=tarefa_id, comentario=comentario)
@@ -268,12 +295,10 @@ def adicionar_comentario(tarefa_id: int, comentario: Comentario, db_session: Ses
     else:
         return sucesso
 
-
-# Endpoint para editar um comentário em uma tarefa específica
-@projeto_router.put('/{tarefa_id}/comentarios/{comentario_id}', summary='Atualiza um comentario existente //TESTADO')
-def modificar_comentario(tarefa_id: int, comentario_id: int, comentario: str, db_session: Session = Depends(get_db_session)):
+@comentario_router.put('/{comentario_id}', summary='Atualiza um comentario existente')
+def modificar_comentario(comentario_id: int, comentario: str, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
-    sucesso, falha = ps.editar_comentario(tarefa_id=tarefa_id, comentario_id=comentario_id, comentario=comentario)
+    sucesso, falha = ps.editar_comentario(comentario_id=comentario_id, comentario=comentario)
 
     if sucesso is None:
         return falha
@@ -281,12 +306,10 @@ def modificar_comentario(tarefa_id: int, comentario_id: int, comentario: str, db
     else:
         return sucesso
 
-
-# Endpoint para excluir um comentário em uma tarefa específica
-@projeto_router.delete('/{tarefa_id}/comentarios/{comentario_id}', summary='Excluir um comentario //TESTADO')
-def remover_comentario(tarefa_id: int, comentario_id: int, db_session: Session = Depends(get_db_session)):
+@comentario_router.delete('/{comentario_id}', summary='Excluir um comentario ')
+def remover_comentario(comentario_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
-    sucesso, falha = ps.excluir_comentario(tarefa_id=tarefa_id, comentario_id=comentario_id)
+    sucesso, falha = ps.excluir_comentario(comentario_id=comentario_id)
 
     if sucesso is None:
         return falha
