@@ -8,7 +8,7 @@ from database.depends import get_db_session, token_verifier
 
 from services.projeto_service import ProjetoService
 from services.usuario_service import UsuarioLoginService
-from model.schemas import Usuario, UsuarioLogin, Projeto, Etapa, Tarefa, Comentario, UsuarioAlterarSenha
+from model.schemas import Usuario, UsuarioLogin, Projeto, AlterarInfoProjeto, Etapa, Tarefa, Comentario, UsuarioAlterarSenha
 from database.models import UsuarioModel, ProjetoModel, ViewInfosParticipantesProjetoModel
 
 db_session: Session = Depends(get_db_session)
@@ -133,6 +133,7 @@ def listar_projetos_criados(id_usuario: int, db_session: Session = Depends(get_d
         status_code=status.HTTP_200_OK
     )
 
+
 @projeto_router.post('/{id_usuario}/criar', summary="Criar um projeto para um usuário passando seu ID //TESTADO")
 def criar_projeto(id_usuario: int, projeto: Projeto, db_session: Session = Depends(get_db_session)):
     us = UsuarioLoginService(db_session=db_session)
@@ -149,15 +150,37 @@ def criar_projeto(id_usuario: int, projeto: Projeto, db_session: Session = Depen
     
     else:
         return sucesso
-    
-@projeto_router.put('/{projeto_id}', summary="(IMPLEMENTAR) EDITAR PROJETO")
-def editar_projeto(projeto_id: int, db_session: Session = Depends(get_db_session), usuario: Usuario = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
 
-@projeto_router.delete('/{projeto_id}', summary="(IMPLEMENTAR) EXCLUIR PROJETO")
+
+@projeto_router.put('/{id_projeto}/editar-nome', summary="Editar o nome do Projeto")
+def editar_projeto(projeto_id: int, novoValorCampo: AlterarInfoProjeto, db_session: Session = Depends(get_db_session)):
+    ps = ProjetoService(db_session=db_session)
+    ps.editar_nome(id_projeto=projeto_id, novoValorCampo=novoValorCampo.nova_info)
+
+    return JSONResponse(
+        content='Nome do projeto alterado com sucesso!',
+        status_code=status.HTTP_200_OK
+    )
+
+@projeto_router.put('/{id_projeto}/editar-descricao', summary="Editar a descrição do Projeto")
+def editar_projeto(projeto_id: int, novoValorCampo: AlterarInfoProjeto, db_session: Session = Depends(get_db_session)):
+    ps = ProjetoService(db_session=db_session)
+    ps.editar_descricao(id_projeto=projeto_id, novoValorCampo=novoValorCampo.nova_info)
+
+    return JSONResponse(
+        content='Descrição do projeto alterado com sucesso!',
+        status_code=status.HTTP_200_OK
+    )
+
+@projeto_router.delete('/{projeto_id}', summary="Excluir um projeto")
 def excluir_projeto(projeto_id: int, db_session: Session = Depends(get_db_session), usuario: Usuario = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
+    ps.deletar_projeto(id_projeto=projeto_id)
 
+    return JSONResponse(
+        content='Projeto excluído com sucesso!',
+        status_code=status.HTTP_200_OK
+    )
 
 
 # ETAPAS
