@@ -35,6 +35,10 @@ class Projeto(BaseModel):
     descricao: str
 
 
+class AlterarInfoProjeto(BaseModel):
+    nova_info: str
+
+
 class ProjetoParticipantes(BaseModel):
     id_projeto: int
     id_participante: int

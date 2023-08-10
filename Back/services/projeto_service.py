@@ -2,7 +2,7 @@ import traceback
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from model.schemas import Comentario, Projeto, Tarefa, Usuario,  Etapa
+from model.schemas import Comentario, Projeto, AlterarInfoProjeto, Tarefa, Usuario,  Etapa
 from database.models import ProjetoModel, ProjetoParticipanteModel, ViewInfosParticipantesProjetoModel
 from fastapi import status
 from fastapi.exceptions import HTTPException
@@ -174,7 +174,26 @@ class ProjetoService:
             infos_projetos.append(info)
 
         return infos_projetos
-    
+
+    def editar_nome(self, id_projeto, novoValorCampo):
+        projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto=id_projeto).first()
+        projeto.nome = novoValorCampo
+        self.db_session.commit()
+        self.db_session.refresh(projeto)
+
+    def editar_descricao(self, id_projeto, novoValorCampo):
+        projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto=id_projeto).first()
+        projeto.descricao = novoValorCampo
+        self.db_session.commit()
+        self.db_session.refresh(projeto)
+
+    def deletar_projeto(self, id_projeto):
+        projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto=id_projeto).first()
+        # todo: precisa antes deletar os participantes da tabela projeto_participantes
+        self.db_session.delete(projeto)
+        self.db_session.commit()
+
+
     def listar_tarefas(self, projeto_id: int, etapa_id: int):
         # Lógica para listar as tarefas de uma etapa específica de um projeto
         projeto = self.db_session.query(Projeto).filter(Projeto.id == projeto_id).first()
