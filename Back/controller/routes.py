@@ -20,7 +20,7 @@ projeto_router = APIRouter(prefix='/projeto')
 
 # -------- ROTAS PARA USUÁRIO -------- #
 
-@usuario_router.post('/cadastrar-login', summary="Cadastro de credenciais: login, senha, email")
+@usuario_router.post('/cadastrar-login', summary="Cadastro de credenciais: login, senha, email //TESTADO")
 def registrar_login(usuario_login: UsuarioLogin, db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     id_usuario_login = uc.registrar_usuario_login(usuario=usuario_login)
@@ -34,7 +34,7 @@ def registrar_login(usuario_login: UsuarioLogin, db_session: Session = Depends(g
     )
 
 
-@usuario_router.post('/{id_login}/cadastrar-usuario', summary="Cadastro de informaçoes do usuario: nome, apelido, data nascimento")
+@usuario_router.post('/{id_login}/cadastrar-usuario', summary="Cadastro de informaçoes do usuario: nome, apelido, data nascimento //TESTADO")
 def registrar_usuario(id_login: int, usuario: Usuario, db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     id_usuario = uc.registrar_usuario(usuario=usuario, id_credencial=id_login)
@@ -48,7 +48,7 @@ def registrar_usuario(id_login: int, usuario: Usuario, db_session: Session = Dep
     )
 
 
-@usuario_router.get('/listar', summary="Listar todos os usuários cadastrados no banco")
+@usuario_router.get('/listar', summary="Listar todos os usuários cadastrados no banco //TESTADO")
 def listar_usuarios(db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     user_dict = uc.listar_usuarios_login()
@@ -59,7 +59,7 @@ def listar_usuarios(db_session: Session = Depends(get_db_session)):
     )
 
 
-@usuario_router.post('/login')
+@usuario_router.post('/login', summary='//TESTADO')
 def login_usuario(request_form_usuario: OAuth2PasswordRequestForm = Depends(), db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     usuario = UsuarioLogin(
@@ -92,17 +92,17 @@ def teste_login():
 # -------- ROTAS PARA PROJETO -------- #
 
 # Pra listarmos os projetos, precisamos de um usuário logado
-@projeto_router.get('/desenvolver')
-def listar_projetos(db_session: Session = Depends(get_db_session), usuario: Usuario = Depends(get_db_session)):
+@projeto_router.get('/desenvolver', summary='Lista todos os projetos //TESTADO')
+def listar_projetos(db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
-    projetos_dict = ps.listar_projetos(usuario=usuario)
+    projetos_dict = ps.listar_projetos()
 
     return JSONResponse(
         content=projetos_dict,
         status_code=status.HTTP_200_OK
     )
 
-@projeto_router.get('/{id_usuario}/listar', summary="Listar projetos que o usuário participa")
+@projeto_router.get('/{id_usuario}/listar', summary="Listar projetos que o usuário participa //TESTADO")
 def listar_projetos(id_usuario: int, db_session: Session = Depends(get_db_session)):
     us = UsuarioLoginService(db_session=db_session)
     usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
@@ -118,7 +118,7 @@ def listar_projetos(id_usuario: int, db_session: Session = Depends(get_db_sessio
     )
 
 
-@projeto_router.get('/{id_usuario}/listar-criados', summary="Listar os projetos que o usuário criou")
+@projeto_router.get('/{id_usuario}/listar-criados', summary="Listar os projetos que o usuário criou //TESTADO")
 def listar_projetos_criados(id_usuario: int, db_session: Session = Depends(get_db_session)):
     us = UsuarioLoginService(db_session=db_session)
     usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
@@ -133,7 +133,7 @@ def listar_projetos_criados(id_usuario: int, db_session: Session = Depends(get_d
         status_code=status.HTTP_200_OK
     )
 
-@projeto_router.post('/{id_usuario}/criar', summary="Criar um projeto para um usuário passando seu ID")
+@projeto_router.post('/{id_usuario}/criar', summary="Criar um projeto para um usuário passando seu ID //TESTADO")
 def criar_projeto(id_usuario: int, projeto: Projeto, db_session: Session = Depends(get_db_session)):
     us = UsuarioLoginService(db_session=db_session)
     usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
@@ -189,7 +189,7 @@ def excluir_etapa(projeto_id: int, etapa_id: int, db_session: Session = Depends(
 # TAREFAS
 
 # Endpoint para pegar no front-end os dados das tarefas de um projeto específico para fornecer aos cards de projetos na página inicial
-@projeto_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas')
+@projeto_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas', summary='Listar as tarefas de uma determindada etapa e projeto //TESTADO')
 def listar_tarefas(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
     tarefas_dict, respostaJSON = ps.listar_tarefas(projeto_id=projeto_id, etapa_id=etapa_id)
@@ -218,7 +218,7 @@ def excluir_etapa(projeto_id: int, etapa_id: int, tarefa_id:int, db_session: Ses
 # COMENTÁRIOS
 
 # Endpoint para pegar no front-end os dados dos comentários de um projeto específico para fornecer aos cards de projetos na página inicial
-@projeto_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas/{tarefa_id}/comentarios')
+@projeto_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas/{tarefa_id}/comentarios //TESTADO')
 def listar_comentarios(projeto_id: int, etapa_id: int, tarefa_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
     comentarios_dict, respostaJSON = ps.listar_comentarios(projeto_id=projeto_id, etapa_id=etapa_id, tarefa_id=tarefa_id)
@@ -234,10 +234,10 @@ def listar_comentarios(projeto_id: int, etapa_id: int, tarefa_id: int, db_sessio
 
 
 # Endpoint para postar um comentário em uma tarefa específica
-@projeto_router.post('/{tarefa_id}/comentar')
+@projeto_router.post('/{tarefa_id}/comentar', summary='Adiciona um comentario a uma tarefa específica //TESTADO')
 def adicionar_comentario(tarefa_id: int, comentario: Comentario, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
-    sucesso, falha = ps.adicionar_comentario
+    sucesso, falha = ps.adicionar_comentario(tarefa_id=tarefa_id, comentario=comentario)
     
     if sucesso is None:
         return falha
@@ -247,8 +247,8 @@ def adicionar_comentario(tarefa_id: int, comentario: Comentario, db_session: Ses
 
 
 # Endpoint para editar um comentário em uma tarefa específica
-@projeto_router.put('/{tarefa_id}/comentarios/{comentario_id}')
-def modificar_comentario(tarefa_id: int, comentario_id: int, comentario: Comentario, db_session: Session = Depends(get_db_session)):
+@projeto_router.put('/{tarefa_id}/comentarios/{comentario_id}', summary='Atualiza um comentario existente //TESTADO')
+def modificar_comentario(tarefa_id: int, comentario_id: int, comentario: str, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
     sucesso, falha = ps.editar_comentario(tarefa_id=tarefa_id, comentario_id=comentario_id, comentario=comentario)
 
@@ -260,7 +260,7 @@ def modificar_comentario(tarefa_id: int, comentario_id: int, comentario: Comenta
 
 
 # Endpoint para excluir um comentário em uma tarefa específica
-@projeto_router.delete('/{tarefa_id}/comentarios/{comentario_id}')
+@projeto_router.delete('/{tarefa_id}/comentarios/{comentario_id}', summary='Excluir um comentario //TESTADO')
 def remover_comentario(tarefa_id: int, comentario_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
     sucesso, falha = ps.excluir_comentario(tarefa_id=tarefa_id, comentario_id=comentario_id)
