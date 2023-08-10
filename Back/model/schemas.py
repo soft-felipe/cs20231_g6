@@ -45,14 +45,11 @@ class ProjetoParticipantes(BaseModel):
 
 
 class Comentario(BaseModel):
-    id: int
     id_criador: int
-    id_tarefa: int
     descricao: str
 
 
 class Tarefa(BaseModel):
-    id: int
     id_criador: int
     id_responsavel: int
     id_etapa: int
@@ -61,6 +58,5 @@ class Tarefa(BaseModel):
 
 
 class Etapa(BaseModel):
-    id: int
     titulo: str
     tarefas: List[Tarefa]
