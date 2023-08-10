@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from database.depends import get_db_session, token_verifier
 
+from services.etapa_service import EtapaService, ProjetoNaoEncontradoException, ErroAoInserirEtapaException
 from services.projeto_service import ProjetoService
 from services.usuario_service import UsuarioLoginService
 from model.schemas import Usuario, UsuarioLogin, Projeto, AlterarInfoProjeto, Etapa, Tarefa, Comentario, UsuarioAlterarSenha
@@ -186,10 +187,16 @@ def excluir_projeto(projeto_id: int, db_session: Session = Depends(get_db_sessio
 # -------- ROTAS PARA ETAPAS -------- #
 
 # Endpoint para pegar no front-end os dados das etapas de um projeto específico para fornecer aos cards de projetos na página inicial
-@etapa_router.get('/{projeto_id}/etapas', summary="Listar as etapas de um projeto")
+@projeto_router.get('/{projeto_id}/etapa', summary="Listar as etapas de um projeto")
 def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
-    etapas_dict, repostaErro = ps.listar_etapas(projeto_id=projeto_id)
+    es = EtapaService(db_session=db_session)
+    etapas_dict = es.listar_etapas(projeto_id=projeto_id)
+
+    if etapas_dict is None:
+        return JSONResponse(
+                content={'error': 'Projeto não encontrado'},
+                status_code=status.HTTP_404_NOT_FOUND
+            )
 
     if etapas_dict is None:
         return repostaErro
@@ -197,15 +204,43 @@ def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)
     else:
         return etapas_dict
     
-@etapa_router.post('/{projeto_id}/etapas', summary="(IMPLEMENTAR) ADICIONAR NOVA ETAPA")
-def adicionar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
+@projeto_router.post('/{projeto_id}/etapa', summary="Adiciona uma nova etapa")
+def adicionar_etapas(projeto_id: int, etapa: Etapa, db_session: Session = Depends(get_db_session)):
+    etapa_service = EtapaService(db_session=db_session)
+    
+    try:
+        id_etapa = etapa_service.criar_etapa(projeto_id=projeto_id, etapa=etapa)
+        
+        return JSONResponse(
+            content={
+                'msg': f"Etapa '{etapa.titulo}' criada com sucesso no projeto '{projeto_id}'",
+                'id_etapa':  f"'{id_etapa}"
+            },
+            status_code=status.HTTP_201_CREATED
+        )
+    except ProjetoNaoEncontradoException as e:
+        return JSONResponse(
+            content={
+                'msg': f"{e.getMensagem()}"
+            },
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+        
+    except ErroAoInserirEtapaException as e:
+       return JSONResponse(
+            content={
+                'msg': f"{e.getMensagem()}"
+            },
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    
+    
 
-@etapa_router.put('/{projeto_id}/etapas/{etapa_id}', summary="(IMPLEMENTAR) EDITAR ETAPA EXISTENTE")
+@projeto_router.put('/{projeto_id}/etapa/{etapa_id}', summary="(IMPLEMENTAR) EDITAR ETAPA EXISTENTE")
 def editar_etapa(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
 
-@etapa_router.delete('/{projeto_id}/etapas/{etapa_id}', summary="(IMPLEMENTAR) EXCLUIR ETAPA EXISTENTE")
+@projeto_router.delete('/{projeto_id}/etapa/{etapa_id}', summary="(IMPLEMENTAR) EXCLUIR ETAPA EXISTENTE")
 def excluir_etapa(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
 

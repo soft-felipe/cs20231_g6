@@ -71,31 +71,6 @@ class ProjetoService:
                 },
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        
-    def listar_etapas(self, projeto_id:int):
-        # Lógica para listar as etapas de um projeto específico
-        projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto = projeto_id).first()
-
-        if not projeto:
-            return None, JSONResponse(
-                content={'error': 'Projeto não encontrado'},
-                status_code=status.HTTP_404_NOT_FOUND
-            )
-
-        etapas = self.db_session.query(EtapaModel).filter_by(id_projeto = projeto_id).all()
-
-        etapas_dict = []
-        for etapa in etapas:
-            etapa_dict = {
-                'id_etapa': etapa.id_etapa,
-                'nome': etapa.nome
-            }
-            etapas_dict.append(etapa_dict)
- 
-        return JSONResponse(
-            content=etapas_dict,
-            status_code=status.HTTP_200_OK
-        ), None
     
     def listar_projetos(self):
         # Buscar os projetos do usuário no banco de dados
