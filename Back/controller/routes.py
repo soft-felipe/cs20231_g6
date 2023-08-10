@@ -218,7 +218,7 @@ def excluir_etapa(projeto_id: int, etapa_id: int, tarefa_id:int, db_session: Ses
 # COMENTÁRIOS
 
 # Endpoint para pegar no front-end os dados dos comentários de um projeto específico para fornecer aos cards de projetos na página inicial
-@projeto_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas/{tarefa_id}/comentarios //TESTADO')
+@projeto_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas/{tarefa_id}/comentarios', summary='Lista todos os comentarios //TESTADO')
 def listar_comentarios(projeto_id: int, etapa_id: int, tarefa_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
     comentarios_dict, respostaJSON = ps.listar_comentarios(projeto_id=projeto_id, etapa_id=etapa_id, tarefa_id=tarefa_id)
