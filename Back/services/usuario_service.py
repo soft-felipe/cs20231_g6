@@ -92,7 +92,7 @@ class UsuarioLoginService:
         exp = datetime.utcnow() + timedelta(minutes=expires_in)
 
         payload = {
-            'sub': usuario.username,
+            'sub': usuario_back.username,
             'exp': exp,
         }
 
