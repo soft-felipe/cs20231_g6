@@ -35,25 +35,24 @@ class Projeto(BaseModel):
     descricao: str
 
 
+class AlterarInfoProjeto(BaseModel):
+    nova_info: str
+
+
 class ProjetoParticipantes(BaseModel):
     id_projeto: int
     id_participante: int
 
 
 class Comentario(BaseModel):
-    id: int
     id_criador: int
-    id_tarefa: int
     descricao: str
 
 
 class Tarefa(BaseModel):
-    id: int
     id_criador: int
     id_responsavel: int
-    id_etapa: int
     descricao: str
-    comentarios: List[Comentario]
 
 
 class Etapa(BaseModel):

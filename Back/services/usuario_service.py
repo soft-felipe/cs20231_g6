@@ -92,7 +92,7 @@ class UsuarioLoginService:
         exp = datetime.utcnow() + timedelta(minutes=expires_in)
 
         payload = {
-            'sub': usuario.username,
+            'sub': usuario_back.username,
             'exp': exp,
         }
 
@@ -130,7 +130,6 @@ class UsuarioLoginService:
             )
 
         return True, None
-
 
     def obtem_id_credencial(self, id_usuario: int):
         usuario_back = self.db_session.query(UsuarioModel).filter_by(id_usuario=id_usuario).first()
