@@ -264,10 +264,35 @@ def editar_etapa(etapa_id: int, etapa: Etapa, db_session: Session = Depends(get_
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-@projeto_router.delete('/{projeto_id}/etapa/{etapa_id}', summary="(IMPLEMENTAR) EXCLUIR ETAPA EXISTENTE")
-def excluir_etapa(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
-
+@projeto_router.delete('/etapa/{etapa_id}', summary="Exclui uma etapa")
+def excluir_etapa(etapa_id: int, db_session: Session = Depends(get_db_session)):
+    etapa_service = EtapaService(db_session=db_session)
+    
+    try:
+        etapa_service.deletar_etapa(etapa_id=etapa_id)
+        
+        return JSONResponse(
+            content={
+                'msg': "Etapa deletada com sucesso!",
+                'id_etapa':  f"'{etapa_id}"
+            },
+            status_code=status.HTTP_200_OK
+        )
+        
+    except EtapaNaoEncontradaException as e:
+        return JSONResponse(
+            content={
+                'msg': f"{e.getMensagem()}"
+            },
+            status_code=status.HTTP_404_NOT_FOUND
+        )
+    except ErroAoInserirEtapaException as e:
+        return JSONResponse(
+            content={
+                'msg': f"{e.getMensagem()}"
+            },
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )    
 
 # -------- ROTAS PARA TAREFAS -------- #
 

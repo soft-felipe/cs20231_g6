@@ -72,6 +72,20 @@ class EtapaService:
             raise ErroAoInserirEtapaException(f"Não foi possível editar a etapa '{etapa.titulo}'")
         
 
+    def deletar_etapa(self, etapa_id: int):
+        try:
+            etapa = self.recupera_etapa(etapa_id=etapa_id)
+        except EtapaNaoEncontradaException as excecao:
+            raise excecao
+        
+        try:
+            self.db_session.delete(etapa)
+            self.db_session.commit()
+        except Exception:
+            traceback.print_exc()
+            self.db_session.rollback()
+            raise ErroAoInserirEtapaException(f"Falha em tentar deletar a etapa '{etapa_id}'")
+
 class EtapaNaoEncontradaException(Exception):
     def __init__ (self, mensagem):
         self.mensagem = mensagem
