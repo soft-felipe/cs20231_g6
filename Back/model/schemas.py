@@ -14,18 +14,22 @@ class Usuario(BaseModel):
 class UsuarioLogin(BaseModel):
     username: str
     senha: str
-    email: EmailStr = Field(None)
 
-    @validator('username')
-    def validar_username(cls, value):
-        if not re.match('^([a-z]|[0-9]|@|_|-)+$', value):
-            raise ValueError('Formato invalido de nome de usuario')
-        return value
+
+class UsuarioAlterarSenha(BaseModel):
+    username: str
+    senha_atual: str
+    nova_senha: str
+    email: EmailStr = Field(None)
 
 
 class Projeto(BaseModel):
     nome: str
     descricao: str
+
+
+class AlterarInfoProjeto(BaseModel):
+    nova_info: str
 
 
 class ProjetoParticipantes(BaseModel):
@@ -34,22 +38,15 @@ class ProjetoParticipantes(BaseModel):
 
 
 class Comentario(BaseModel):
-    id: int
     id_criador: int
-    id_tarefa: int
     descricao: str
 
 
 class Tarefa(BaseModel):
-    id: int
     id_criador: int
     id_responsavel: int
-    id_etapa: int
     descricao: str
-    comentarios: List[Comentario]
 
 
 class Etapa(BaseModel):
-    id: int
     titulo: str
-    tarefas: List[Tarefa]

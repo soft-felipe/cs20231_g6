@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database.models import UsuarioModel, UsuarioLoginModel
-from model.schemas import Usuario, UsuarioLogin
+from model.schemas import Usuario, UsuarioLogin, UsuarioAlterarSenha
 from passlib.context import CryptContext
 from fastapi.exceptions import HTTPException
 from fastapi import status
@@ -58,7 +58,16 @@ class UsuarioLoginService:
     def listar_usuarios_login(self):
         try:
             usuario_lista = self.db_session.query(UsuarioLoginModel).all()
-            return usuario_lista
+            user_dict = []
+
+            for u in usuario_lista:
+                infos_json = {
+                    'id_login': u.id_login,
+                    'email': u.email
+                }
+                user_dict.append(infos_json)
+
+            return user_dict
         except:
             raise HTTPException(
                 detail="Erro ao buscar usuarios",
@@ -83,7 +92,7 @@ class UsuarioLoginService:
         exp = datetime.utcnow() + timedelta(minutes=expires_in)
 
         payload = {
-            'sub': usuario.username,
+            'sub': usuario_back.username,
             'exp': exp,
         }
 
@@ -121,3 +130,22 @@ class UsuarioLoginService:
             )
 
         return True, None
+
+    def obtem_id_credencial(self, id_usuario: int):
+        usuario_back = self.db_session.query(UsuarioModel).filter_by(id_usuario=id_usuario).first()
+        return usuario_back.id_credencial
+
+    def valida_senha_email(self, id_usuario: int, usuario_alterar_senha: UsuarioAlterarSenha):
+        id_credencial = self.obtem_id_credencial(id_usuario=id_usuario)
+        login_back = self.db_session.query(UsuarioLoginModel).filter_by(id_login=id_credencial).first()
+
+        if not crypt_context.verify(usuario_alterar_senha.senha_atual, login_back.senha) or usuario_alterar_senha.email != login_back.email:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='Email ou senha incorretos.'
+            )
+
+        login_back.senha = crypt_context.hash(usuario_alterar_senha.nova_senha)
+        self.db_session.commit()
+        self.db_session.refresh(login_back)
+        return login_back
