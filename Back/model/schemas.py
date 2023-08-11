@@ -14,6 +14,7 @@ class Usuario(BaseModel):
 class UsuarioLogin(BaseModel):
     username: str
     senha: str
+    email: EmailStr = Field(None)
 
 
 class UsuarioAlterarSenha(BaseModel):
