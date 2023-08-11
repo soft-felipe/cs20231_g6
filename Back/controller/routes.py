@@ -5,9 +5,11 @@ from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from database.depends import get_db_session, token_verifier
+from services.comentario_service import ComentarioService
 
 from services.etapa_service import EtapaService, ProjetoNaoEncontradoException, ErroAoInserirEtapaException, EtapaNaoEncontradaException
 from services.projeto_service import ProjetoService
+from services.tarefa_service import TarefaService
 from services.usuario_service import UsuarioLoginService
 from model.schemas import Usuario, UsuarioLogin, Projeto, AlterarInfoProjeto, Etapa, Tarefa, Comentario, UsuarioAlterarSenha
 from database.models import UsuarioModel, ProjetoModel, ViewInfosParticipantesProjetoModel
@@ -61,11 +63,11 @@ def listar_usuarios(db_session: Session = Depends(get_db_session)):
     )
 
 @usuario_router.post('/login', summary='Rota para o usuario realizar login')
-def login_usuario(request_form_usuario: OAuth2PasswordRequestForm = Depends(), db_session: Session = Depends(get_db_session)):
+def login_usuario(request_form_usuario: UsuarioLogin, db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     usuario = UsuarioLogin(
         username=request_form_usuario.username,
-        senha=request_form_usuario.password
+        senha=request_form_usuario.senha
     )
     auth_data = uc.login_usuario(usuario=usuario)
     return JSONResponse(
@@ -197,10 +199,7 @@ def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)
                 content={'error': 'Projeto não encontrado'},
                 status_code=status.HTTP_404_NOT_FOUND
             )
-
-    if etapas_dict is None:
-        return repostaErro
-
+    
     else:
         return etapas_dict
     
@@ -274,8 +273,8 @@ def excluir_etapa(projeto_id: int, etapa_id: int, db_session: Session = Depends(
 
 @tarefas_router.get('/{projeto_id}/{etapa_id}', summary='Listar as tarefas de uma determindada etapa e projeto ')
 def listar_tarefas(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
-    tarefas_dict, respostaJSON = ps.listar_tarefas(projeto_id=projeto_id, etapa_id=etapa_id)
+    ts = TarefaService(db_session=db_session)
+    tarefas_dict, respostaJSON = ts.listar_tarefas(projeto_id=projeto_id, etapa_id=etapa_id)
 
     if tarefas_dict is None:
         return respostaJSON
@@ -285,8 +284,8 @@ def listar_tarefas(projeto_id: int, etapa_id: int, db_session: Session = Depends
 
 @tarefas_router.post('/{projeto_id}/{etapa_id}', summary="Adicionar uma nova tarefa à uma etapa ")
 def adicinar_tarefa(projeto_id: int, etapa_id: int, tarefa: Tarefa, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
-    sucesso, falha = ps.adicionar_tarefa(projeto_id=projeto_id, etapa_id=etapa_id, tarefa=tarefa)
+    ts = TarefaService(db_session=db_session)
+    sucesso, falha = ts.adicionar_tarefa(projeto_id=projeto_id, etapa_id=etapa_id, tarefa=tarefa)
 
     if sucesso is None:
         return falha
@@ -296,8 +295,8 @@ def adicinar_tarefa(projeto_id: int, etapa_id: int, tarefa: Tarefa, db_session: 
 
 @tarefas_router.put('/{tarefa_id}/descricao', summary="Editar descrição de uma tarefa existente ")
 def editar_tarefa_descricao(tarefa_id:int, descricao:str, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
-    sucesso, falha = ps.editar_tarefa_descricao(tarefa_id=tarefa_id, descricao=descricao)
+    ts = TarefaService(db_session=db_session)
+    sucesso, falha = ts.editar_tarefa_descricao(tarefa_id=tarefa_id, descricao=descricao)
 
     if sucesso is None:
         return falha
@@ -307,8 +306,8 @@ def editar_tarefa_descricao(tarefa_id:int, descricao:str, db_session: Session = 
     
 @tarefas_router.put('/{tarefa_id}/responsavel', summary='Altera o responsavel pela tarefa existente ')
 def editar_tarefa_responsavel(tarefa_id:int, id_responsavel:int, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
-    sucesso, falha = ps.editar_tarefa_responsavel(tarefa_id=tarefa_id, id_responsavel=id_responsavel)
+    ts = TarefaService(db_session=db_session)
+    sucesso, falha = ts.editar_tarefa_responsavel(tarefa_id=tarefa_id, id_responsavel=id_responsavel)
 
     if sucesso is None:
         return falha
@@ -318,8 +317,8 @@ def editar_tarefa_responsavel(tarefa_id:int, id_responsavel:int, db_session: Ses
 
 @tarefas_router.delete('/{tarefa_id}', summary="Exclui uma tarefa existente")
 def excluir_tarefa(tarefa_id:int, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
-    sucesso, falha = ps.excluir_tarefa(tarefa_id=tarefa_id)
+    ts = TarefaService(db_session=db_session)
+    sucesso, falha = ts.excluir_tarefa(tarefa_id=tarefa_id)
 
     if sucesso is None:
         return falha
@@ -332,8 +331,8 @@ def excluir_tarefa(tarefa_id:int, db_session: Session = Depends(get_db_session))
 
 @comentario_router.get('/{projeto_id}/etapas/{etapa_id}/tarefas/{tarefa_id}/comentarios', summary='Lista todos os comentarios')
 def listar_comentarios(projeto_id: int, etapa_id: int, tarefa_id: int, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
-    comentarios_dict, respostaJSON = ps.listar_comentarios(projeto_id=projeto_id, etapa_id=etapa_id, tarefa_id=tarefa_id)
+    cs = ComentarioService(db_session=db_session)
+    comentarios_dict, respostaJSON = cs.listar_comentarios(projeto_id=projeto_id, etapa_id=etapa_id, tarefa_id=tarefa_id)
 
     if comentarios_dict is None:
         return respostaJSON
@@ -346,8 +345,8 @@ def listar_comentarios(projeto_id: int, etapa_id: int, tarefa_id: int, db_sessio
 
 @comentario_router.post('/tarefa/{tarefa_id}', summary='Adiciona um comentario a uma tarefa específica')
 def adicionar_comentario(tarefa_id: int, comentario: Comentario, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
-    sucesso, falha = ps.adicionar_comentario(tarefa_id=tarefa_id, comentario=comentario)
+    cs = ComentarioService(db_session=db_session)
+    sucesso, falha = cs.adicionar_comentario(tarefa_id=tarefa_id, comentario=comentario)
     
     if sucesso is None:
         return falha
@@ -357,8 +356,8 @@ def adicionar_comentario(tarefa_id: int, comentario: Comentario, db_session: Ses
 
 @comentario_router.put('/{comentario_id}', summary='Atualiza um comentario existente')
 def modificar_comentario(comentario_id: int, comentario: str, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
-    sucesso, falha = ps.editar_comentario(comentario_id=comentario_id, comentario=comentario)
+    cs = ComentarioService(db_session=db_session)
+    sucesso, falha = cs.editar_comentario(comentario_id=comentario_id, comentario=comentario)
 
     if sucesso is None:
         return falha
@@ -368,8 +367,8 @@ def modificar_comentario(comentario_id: int, comentario: str, db_session: Sessio
 
 @comentario_router.delete('/{comentario_id}', summary='Excluir um comentario ')
 def remover_comentario(comentario_id: int, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
-    sucesso, falha = ps.excluir_comentario(comentario_id=comentario_id)
+    cs = ComentarioService(db_session=db_session)
+    sucesso, falha = cs.excluir_comentario(comentario_id=comentario_id)
 
     if sucesso is None:
         return falha
