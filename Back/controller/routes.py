@@ -245,7 +245,7 @@ def editar_etapa(etapa_id: int, etapa: Etapa, db_session: Session = Depends(get_
         
         return JSONResponse(
             content={
-                'msg': f"Nome da etapa alterado com sucesso para '{etapa.nome}",
+                'msg': f"Nome da etapa alterado com sucesso para '{etapa.titulo}",
                 'id_etapa':  f"'{etapa_id}"
             },
             status_code=status.HTTP_201_CREATED
