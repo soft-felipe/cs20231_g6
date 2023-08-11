@@ -14,13 +14,6 @@ class Usuario(BaseModel):
 class UsuarioLogin(BaseModel):
     username: str
     senha: str
-    email: EmailStr = Field(None)
-
-    @validator('username')
-    def validar_username(cls, value):
-        if not re.match('^([a-z]|[0-9]|@|_|-)+$', value):
-            raise ValueError('Formato invalido de nome de usuario')
-        return value
 
 
 class UsuarioAlterarSenha(BaseModel):
