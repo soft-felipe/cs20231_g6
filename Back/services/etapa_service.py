@@ -48,6 +48,36 @@ class EtapaService:
             self.db_session.rollback()
             raise ErroAoInserirEtapaException(f"Não foi possível inserir a etapa '{etapa.titulo}' no projeto '{projeto_id}'")
 
+    def recupera_etapa(self, etapa_id: int):
+        etapa = self.db_session.query(EtapaModel).filter_by(id_etapa = etapa_id).first()
+        if not etapa:
+            raise EtapaNaoEncontradaException(f"Etapa com id='{etapa_id}' não encontrada")
+        
+        return etapa
+    
+
+    def editar_etapa(self, etapa_id: int, etapa_alteracao: Etapa):
+        try:
+            etapa = self.recupera_etapa(etapa_id=etapa_id)
+        except EtapaNaoEncontradaException as excecao:
+            raise excecao
+        
+        etapa.nome = etapa_alteracao.titulo
+        
+        try:
+            self.db_session.commit()
+        except Exception:
+            traceback.print_exc()
+            self.db_session.rollback()
+            raise ErroAoInserirEtapaException(f"Não foi possível editar a etapa '{etapa.titulo}'")
+        
+
+class EtapaNaoEncontradaException(Exception):
+    def __init__ (self, mensagem):
+        self.mensagem = mensagem
+        
+    def getMensagem(self):
+        return self.mensagem    
 
 class ProjetoNaoEncontradoException(Exception):
     def __init__ (self, mensagem):

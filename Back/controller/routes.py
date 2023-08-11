@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from database.depends import get_db_session, token_verifier
 from services.comentario_service import ComentarioService
 
-from services.etapa_service import EtapaService, ProjetoNaoEncontradoException, ErroAoInserirEtapaException
+from services.etapa_service import EtapaService, ProjetoNaoEncontradoException, ErroAoInserirEtapaException, EtapaNaoEncontradaException
 from services.projeto_service import ProjetoService
 from services.tarefa_service import TarefaService
 from services.usuario_service import UsuarioLoginService
@@ -235,9 +235,34 @@ def adicionar_etapas(projeto_id: int, etapa: Etapa, db_session: Session = Depend
     
     
 
-@projeto_router.put('/{projeto_id}/etapa/{etapa_id}', summary="(IMPLEMENTAR) EDITAR ETAPA EXISTENTE")
-def editar_etapa(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
+@projeto_router.put('/etapa/{etapa_id}', summary="Editar uma etapa existente")
+def editar_etapa(etapa_id: int, etapa: Etapa, db_session: Session = Depends(get_db_session)):
+    etapa_service = EtapaService(db_session=db_session)
+    
+    try:
+        etapa_service.editar_etapa(etapa_id=etapa_id, etapa_alteracao=etapa)
+        
+        return JSONResponse(
+            content={
+                'msg': f"Nome da etapa alterado com sucesso para '{etapa.titulo}",
+                'id_etapa':  f"'{etapa_id}"
+            },
+            status_code=status.HTTP_201_CREATED
+        )
+    except EtapaNaoEncontradaException as e:
+        return JSONResponse(
+            content={
+                'msg': f"{e.getMensagem()}"
+            },
+            status_code=status.HTTP_404_NOT_FOUND
+        )
+    except ErroAoInserirEtapaException as e:
+        return JSONResponse(
+            content={
+                'msg': f"{e.getMensagem()}"
+            },
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 @projeto_router.delete('/{projeto_id}/etapa/{etapa_id}', summary="(IMPLEMENTAR) EXCLUIR ETAPA EXISTENTE")
 def excluir_etapa(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
