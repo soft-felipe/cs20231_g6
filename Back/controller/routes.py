@@ -202,7 +202,7 @@ def listar_projeto_completo(projeto_id: int, db_session: Session = Depends(get_d
 # -------- ROTAS PARA ETAPAS -------- #
 
 # Endpoint para pegar no front-end os dados das etapas de um projeto específico para fornecer aos cards de projetos na página inicial
-@projeto_router.get('/{projeto_id}/etapa', summary="Listar as etapas de um projeto")
+@etapa_router.get('/{projeto_id}/etapa', summary="Listar as etapas de um projeto")
 def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)):
     es = EtapaService(db_session=db_session)
     etapas_dict = es.listar_etapas(projeto_id=projeto_id)
@@ -216,7 +216,7 @@ def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)
     else:
         return etapas_dict
     
-@projeto_router.post('/{projeto_id}/etapa', summary="Adiciona uma nova etapa")
+@etapa_router.post('/{projeto_id}/etapa', summary="Adiciona uma nova etapa")
 def adicionar_etapas(projeto_id: int, etapa: Etapa, db_session: Session = Depends(get_db_session)):
     etapa_service = EtapaService(db_session=db_session)
     
@@ -245,10 +245,8 @@ def adicionar_etapas(projeto_id: int, etapa: Etapa, db_session: Session = Depend
             },
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-    
-    
 
-@projeto_router.put('/etapa/{etapa_id}', summary="Editar uma etapa existente")
+@etapa_router.put('/etapa/{etapa_id}', summary="Editar uma etapa existente")
 def editar_etapa(etapa_id: int, etapa: Etapa, db_session: Session = Depends(get_db_session)):
     etapa_service = EtapaService(db_session=db_session)
     
@@ -277,7 +275,7 @@ def editar_etapa(etapa_id: int, etapa: Etapa, db_session: Session = Depends(get_
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-@projeto_router.delete('/etapa/{etapa_id}', summary="Exclui uma etapa")
+@etapa_router.delete('/etapa/{etapa_id}', summary="Exclui uma etapa")
 def excluir_etapa(etapa_id: int, db_session: Session = Depends(get_db_session)):
     etapa_service = EtapaService(db_session=db_session)
     
@@ -364,6 +362,16 @@ def excluir_tarefa(tarefa_id:int, db_session: Session = Depends(get_db_session))
     else:
         return sucesso
 
+@tarefas_router.put('/{tarefa_id}/mudar_etapa', summary="Muda a etapa de uma tarefa")
+def mudar_etapa(tarefa_id:int, nova_etapa_id:int, db_session: Session = Depends(get_db_session)):
+    ts = TarefaService(db_session=db_session)
+    sucesso, falha = ts.mudar_etapa(tarefa_id=tarefa_id, nova_etapa_id=nova_etapa_id)
+
+    if sucesso is None:
+        return falha
+    
+    else: 
+        return sucesso
 
 # -------- ROTAS PARA COMENTARIOS -------- #
 

@@ -2,7 +2,8 @@ import traceback
 
 from sqlalchemy.orm import Session
 from model.schemas import Etapa
-from database.models import ProjetoModel, EtapaModel
+from database.models import ProjetoModel, EtapaModel, TarefaModel
+from services.tarefa_service import TarefaService
 
 class EtapaService:
     def __init__(self, db_session:Session):
@@ -55,7 +56,6 @@ class EtapaService:
         
         return etapa
     
-
     def editar_etapa(self, etapa_id: int, etapa_alteracao: Etapa):
         try:
             etapa = self.recupera_etapa(etapa_id=etapa_id)
@@ -71,20 +71,27 @@ class EtapaService:
             self.db_session.rollback()
             raise ErroAoInserirEtapaException(f"Não foi possível editar a etapa '{etapa.titulo}'")
         
-
     def deletar_etapa(self, etapa_id: int):
         try:
-            etapa = self.recupera_etapa(etapa_id=etapa_id)
+            etapa = self.db_session.query(EtapaModel).filter_by(id_etapa = etapa_id).first()
+            
+            if not etapa:
+                raise EtapaNaoEncontradaException(f"Etapa com id='{etapa_id}' não encontrada")
+            
+            tarefas = self.db_session.query(TarefaModel).filter_by(id_etapa=etapa_id).all()
+            for tarefa in tarefas: TarefaService.excluir_tarefa(self=self, tarefa_id=tarefa.id_tarefa)
+
         except EtapaNaoEncontradaException as excecao:
             raise excecao
         
         try:
             self.db_session.delete(etapa)
-            self.db_session.commit()
         except Exception:
             traceback.print_exc()
             self.db_session.rollback()
             raise ErroAoInserirEtapaException(f"Falha em tentar deletar a etapa '{etapa_id}'")
+        
+        self.db_session.commit()
 
 class EtapaNaoEncontradaException(Exception):
     def __init__ (self, mensagem):
