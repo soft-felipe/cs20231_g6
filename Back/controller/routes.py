@@ -163,10 +163,9 @@ def editar_projeto(projeto_id: int, projeto: Projeto, db_session: Session = Depe
     
         return JSONResponse(
             content={
-                'msg': f"Projeto alterado com sucesso para '{etapa.titulo}",
-                'id_etapa':  f"'{etapa_id}"
+                'msg': "Projeto alterado com sucesso"
             },
-            status_code=status.HTTP_201_CREATED
+            status_code=status.HTTP_200_OK
         )
     except ProjetoNaoEncontradoException as e:
         return JSONResponse(
