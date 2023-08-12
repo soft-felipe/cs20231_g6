@@ -168,4 +168,60 @@ class ProjetoService:
         self.db_session.delete(projeto)
         self.db_session.commit()
 
+    def listar_projeto_completo(self, id_projeto):
+        projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto=id_projeto).first()
+        
+        if not projeto:
+            return None, JSONResponse(
+                    content={
+                        'msg': "Projeto não encontrado"
+                    },
+                    status_code=status.HTTP_404_NOT_FOUND
+                )
 
+        projetos_dict = []
+        
+        projeto_dict = {
+            "id": projeto.id_projeto,
+            "nome": projeto.nome,
+            "descricao": projeto.descricao,
+            "etapas": []
+        }
+
+        # Buscar as etapas do projeto
+        etapas = self.db_session.query(EtapaModel).filter_by(id_projeto = projeto.id_projeto).all()
+
+        for etapa in etapas:
+            etapa_dict = {
+                "id": etapa.id_etapa,
+                "titulo": etapa.nome,
+                "tarefas": []
+            }
+
+            # Buscar as tarefas da etapa
+            tarefas = self.db_session.query(TarefaModel).filter_by(id_etapa = etapa.id_etapa).all()
+
+            for tarefa in tarefas:
+                tarefa_dict = {
+                    "id": tarefa.id_tarefa,
+                    "descricao": tarefa.descricao,
+                    "comentarios": []
+                }
+
+                # Buscar os comentários da tarefa
+                comentarios = self.db_session.query(ComentarioModel).filter_by(id_tarefa=tarefa.id_tarefa).all()
+
+                for comentario in comentarios:
+                    comentario_dict = {
+                        "id": comentario.id_comentario,
+                        "descricao": comentario.descricao
+                    }
+                    tarefa_dict["comentarios"].append(comentario_dict)
+
+                etapa_dict["tarefas"].append(tarefa_dict)
+
+            projeto_dict["etapas"].append(etapa_dict)
+
+        projetos_dict.append(projeto_dict)
+            
+        return projetos_dict, None

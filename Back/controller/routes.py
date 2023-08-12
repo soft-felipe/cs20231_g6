@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from database.depends import get_db_session, token_verifier
 from services.comentario_service import ComentarioService
 
-from services.etapa_service import EtapaService, ProjetoNaoEncontradoException, ErroAoInserirEtapaException
+from services.etapa_service import EtapaService, ProjetoNaoEncontradoException, ErroAoInserirEtapaException, EtapaNaoEncontradaException
 from services.projeto_service import ProjetoService
 from services.tarefa_service import TarefaService
 from services.usuario_service import UsuarioLoginService
@@ -123,7 +123,7 @@ def listar_projetos(id_usuario: int, db_session: Session = Depends(get_db_sessio
         status_code=status.HTTP_200_OK
     )
 
-@projeto_router.get('/{id_usuario}/listar-criados', summary="Listar os projetos que o usuário crioU")
+@projeto_router.get('/{id_usuario}/listar-criados', summary="Listar os projetos que o usuário criou")
 def listar_projetos_criados(id_usuario: int, db_session: Session = Depends(get_db_session)):
     us = UsuarioLoginService(db_session=db_session)
     usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
@@ -176,7 +176,7 @@ def editar_projeto(projeto_id: int, novoValorCampo: AlterarInfoProjeto, db_sessi
     )
 
 @projeto_router.delete('/{projeto_id}', summary="Excluir um projeto")
-def excluir_projeto(projeto_id: int, db_session: Session = Depends(get_db_session), usuario: Usuario = Depends(get_db_session)):
+def excluir_projeto(projeto_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
     ps.deletar_projeto(id_projeto=projeto_id)
 
@@ -185,6 +185,19 @@ def excluir_projeto(projeto_id: int, db_session: Session = Depends(get_db_sessio
         status_code=status.HTTP_200_OK
     )
 
+@projeto_router.get('/{projeto_id}', summary="Traz todas as etapas, tarefas e comentarios associados a um projeto")
+def listar_projeto_completo(projeto_id: int, db_session: Session = Depends(get_db_session)):
+    ps = ProjetoService(db_session=db_session)
+    sucesso, falha = ps.listar_projeto_completo(id_projeto=projeto_id)
+
+    if sucesso is None:
+        return falha
+    
+    else:
+        return JSONResponse(
+            content=sucesso,
+            status_code=status.HTTP_200_OK
+        )
 
 # -------- ROTAS PARA ETAPAS -------- #
 
@@ -235,14 +248,64 @@ def adicionar_etapas(projeto_id: int, etapa: Etapa, db_session: Session = Depend
     
     
 
-@projeto_router.put('/{projeto_id}/etapa/{etapa_id}', summary="(IMPLEMENTAR) EDITAR ETAPA EXISTENTE")
-def editar_etapa(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
+@projeto_router.put('/etapa/{etapa_id}', summary="Editar uma etapa existente")
+def editar_etapa(etapa_id: int, etapa: Etapa, db_session: Session = Depends(get_db_session)):
+    etapa_service = EtapaService(db_session=db_session)
+    
+    try:
+        etapa_service.editar_etapa(etapa_id=etapa_id, etapa_alteracao=etapa)
+        
+        return JSONResponse(
+            content={
+                'msg': f"Nome da etapa alterado com sucesso para '{etapa.titulo}",
+                'id_etapa':  f"'{etapa_id}"
+            },
+            status_code=status.HTTP_201_CREATED
+        )
+    except EtapaNaoEncontradaException as e:
+        return JSONResponse(
+            content={
+                'msg': f"{e.getMensagem()}"
+            },
+            status_code=status.HTTP_404_NOT_FOUND
+        )
+    except ErroAoInserirEtapaException as e:
+        return JSONResponse(
+            content={
+                'msg': f"{e.getMensagem()}"
+            },
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
-@projeto_router.delete('/{projeto_id}/etapa/{etapa_id}', summary="(IMPLEMENTAR) EXCLUIR ETAPA EXISTENTE")
-def excluir_etapa(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
-
+@projeto_router.delete('/etapa/{etapa_id}', summary="Exclui uma etapa")
+def excluir_etapa(etapa_id: int, db_session: Session = Depends(get_db_session)):
+    etapa_service = EtapaService(db_session=db_session)
+    
+    try:
+        etapa_service.deletar_etapa(etapa_id=etapa_id)
+        
+        return JSONResponse(
+            content={
+                'msg': "Etapa deletada com sucesso!",
+                'id_etapa':  f"'{etapa_id}"
+            },
+            status_code=status.HTTP_200_OK
+        )
+        
+    except EtapaNaoEncontradaException as e:
+        return JSONResponse(
+            content={
+                'msg': f"{e.getMensagem()}"
+            },
+            status_code=status.HTTP_404_NOT_FOUND
+        )
+    except ErroAoInserirEtapaException as e:
+        return JSONResponse(
+            content={
+                'msg': f"{e.getMensagem()}"
+            },
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )    
 
 # -------- ROTAS PARA TAREFAS -------- #
 
