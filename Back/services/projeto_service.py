@@ -1,11 +1,14 @@
 import traceback
 from fastapi.responses import JSONResponse
+from psycopg2 import IntegrityError
 from sqlalchemy.orm import Session
 
 from model.schemas import  Projeto
 from database.models import ComentarioModel, EtapaModel, ProjetoModel, ProjetoParticipanteModel, TarefaModel, ViewInfosParticipantesProjetoModel
 from fastapi import status
 from fastapi.exceptions import HTTPException
+
+from services.etapa_service import EtapaService
 
 class ProjetoService:
     def __init__(self, db_session:Session):
@@ -177,9 +180,54 @@ class ProjetoService:
 
     def deletar_projeto(self, id_projeto):
         projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto=id_projeto).first()
-        # todo: precisa antes deletar os participantes da tabela projeto_participantes
-        self.db_session.delete(projeto)
+
+        if not projeto:
+            return JSONResponse(
+                    content={
+                        'msg': "Projeto não encontrado"
+                    },
+                    status_code=status.HTTP_404_NOT_FOUND
+                )
+        
+        participantes = self.db_session.query(ProjetoParticipanteModel).filter_by(id_projeto = id_projeto).all()
+        
+        try:
+            for participante in participantes:
+                self.db_session.delete(participante)
+        except(Exception):
+            self.db_session.rollback()
+            return JSONResponse(
+                content={
+                        'msg': "Erro ao apagar Projeto-Participante"
+                    },
+                    status_code=status.HTTP_400_BAD_REQUEST
+            )
+
         self.db_session.commit()
+
+        etapas = self.db_session.query(EtapaModel).filter_by(id_projeto=id_projeto).all()
+
+        for etapa in etapas: EtapaService.deletar_etapa(self=self, etapa_id=etapa.id_etapa)
+
+        try:
+            self.db_session.delete(projeto)
+        except(IntegrityError):
+            self.db_session.rollback()
+            return JSONResponse(
+                content={
+                        'msg': "Erro ao apagar Projeto"
+                    },
+                    status_code=status.HTTP_400_BAD_REQUEST
+            )
+        
+        self.db_session.commit()
+
+        return JSONResponse(
+                content={
+                        'msg': "Projeto apagado com sucesso"
+                    },
+                    status_code=status.HTTP_200_OK
+            )
 
     def listar_projeto_completo(self, id_projeto):
         projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto=id_projeto).first()
