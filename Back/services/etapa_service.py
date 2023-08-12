@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from model.schemas import Etapa
 from database.models import ProjetoModel, EtapaModel
 
+from services.projeto_service import ProjetoNaoEncontradoException
+
 class EtapaService:
     def __init__(self, db_session:Session):
         self.db_session = db_session
@@ -92,13 +94,6 @@ class EtapaNaoEncontradaException(Exception):
         
     def getMensagem(self):
         return self.mensagem    
-
-class ProjetoNaoEncontradoException(Exception):
-    def __init__ (self, mensagem):
-        self.mensagem = mensagem
-        
-    def getMensagem(self):
-        return self.mensagem
 
 class ErroAoInserirEtapaException(Exception):
     def __init__ (self, mensagem):

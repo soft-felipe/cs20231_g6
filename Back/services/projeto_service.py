@@ -150,17 +150,30 @@ class ProjetoService:
 
         return infos_projetos
 
-    def editar_nome(self, id_projeto, novoValorCampo):
-        projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto=id_projeto).first()
-        projeto.nome = novoValorCampo
-        self.db_session.commit()
-        self.db_session.refresh(projeto)
+    def editar_projeto(self, id_projeto: int, projeto_alteracao: Projeto):
+        try: 
+            projeto = self.recuperar_projeto(id_projeto=id_projeto)
+        except ProjetoNaoEncontradoException as excecao:
+            raise excecao
+        if (projeto_alteracao.nome != None and projeto_alteracao.nome != ""):
+            projeto.nome = projeto_alteracao.nome
+        
+        if (projeto_alteracao.descricao != None and projeto_alteracao.descricao != ""):
+            projeto.descricao = projeto_alteracao.descricao
+        
+        try:
+            self.db_session.commit()
+        except Exception:
+            traceback.print_exc()
+            self.db_session.rollback()
+            raise ErroAoInserirProjeto(f"Não foi possível editar o projeto '{projeto.titulo}'")
 
-    def editar_descricao(self, id_projeto, novoValorCampo):
-        projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto=id_projeto).first()
-        projeto.descricao = novoValorCampo
-        self.db_session.commit()
-        self.db_session.refresh(projeto)
+    def recuperar_projeto(self, id_projeto: int):
+        try:
+            projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto=id_projeto).first()
+            return projeto
+        except Exception:
+            raise ProjetoNaoEncontradoException(f"Projeto com id='{id_projeto}' não encontrado")
 
     def deletar_projeto(self, id_projeto):
         projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto=id_projeto).first()
@@ -225,3 +238,18 @@ class ProjetoService:
         projetos_dict.append(projeto_dict)
             
         return projetos_dict, None
+
+class ProjetoNaoEncontradoException(Exception):
+    def __init__ (self, mensagem):
+        self.mensagem = mensagem
+        
+    def getMensagem(self):
+        return self.mensagem
+    
+    
+class ErroAoInserirProjeto(Exception):
+    def __init__ (self, mensagem):
+        self.mensagem = mensagem
+        
+    def getMensagem(self):
+        return self.mensagem

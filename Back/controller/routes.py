@@ -11,7 +11,7 @@ from services.etapa_service import EtapaService, ProjetoNaoEncontradoException, 
 from services.projeto_service import ProjetoService
 from services.tarefa_service import TarefaService
 from services.usuario_service import UsuarioLoginService
-from model.schemas import Usuario, UsuarioLogin, Projeto, AlterarInfoProjeto, Etapa, Tarefa, Comentario, UsuarioAlterarSenha
+from model.schemas import Usuario, UsuarioLogin, Projeto, Etapa, Tarefa, Comentario, UsuarioAlterarSenha
 from database.models import UsuarioModel, ProjetoModel, ViewInfosParticipantesProjetoModel
 
 db_session: Session = Depends(get_db_session)
@@ -155,25 +155,33 @@ def criar_projeto(id_usuario: int, projeto: Projeto, db_session: Session = Depen
     else:
         return sucesso
 
-@projeto_router.put('/{id_projeto}/editar-nome', summary="Editar o nome do Projeto")
-def editar_projeto(projeto_id: int, novoValorCampo: AlterarInfoProjeto, db_session: Session = Depends(get_db_session)):
+@projeto_router.put('/{id_projeto}/editar', summary="Editar projeto")
+def editar_projeto(projeto_id: int, projeto: Projeto, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
-    ps.editar_nome(id_projeto=projeto_id, novoValorCampo=novoValorCampo.nova_info)
-
-    return JSONResponse(
-        content='Nome do projeto alterado com sucesso!',
-        status_code=status.HTTP_200_OK
-    )
-
-@projeto_router.put('/{id_projeto}/editar-descricao', summary="Editar a descrição do Projeto")
-def editar_projeto(projeto_id: int, novoValorCampo: AlterarInfoProjeto, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
-    ps.editar_descricao(id_projeto=projeto_id, novoValorCampo=novoValorCampo.nova_info)
-
-    return JSONResponse(
-        content='Descrição do projeto alterado com sucesso!',
-        status_code=status.HTTP_200_OK
-    )
+    try:
+        ps.editar_projeto(id_projeto=projeto_id, projeto_alteracao=projeto)
+    
+        return JSONResponse(
+            content={
+                'msg': f"Projeto alterado com sucesso para '{etapa.titulo}",
+                'id_etapa':  f"'{etapa_id}"
+            },
+            status_code=status.HTTP_201_CREATED
+        )
+    except ProjetoNaoEncontradoException as e:
+        return JSONResponse(
+            content={
+                'msg': f"{e.getMensagem()}"
+            },
+            status_code=status.HTTP_404_NOT_FOUND
+        )
+    except ErroAoInserirEtapaException as e:
+        return JSONResponse(
+            content={
+                'msg': f"{e.getMensagem()}"
+            },
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 @projeto_router.delete('/{projeto_id}', summary="Excluir um projeto")
 def excluir_projeto(projeto_id: int, db_session: Session = Depends(get_db_session)):
@@ -260,7 +268,7 @@ def editar_etapa(etapa_id: int, etapa: Etapa, db_session: Session = Depends(get_
                 'msg': f"Nome da etapa alterado com sucesso para '{etapa.titulo}",
                 'id_etapa':  f"'{etapa_id}"
             },
-            status_code=status.HTTP_201_CREATED
+            status_code=status.HTTP_200_OK
         )
     except EtapaNaoEncontradaException as e:
         return JSONResponse(
