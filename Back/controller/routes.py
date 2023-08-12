@@ -7,11 +7,11 @@ from sqlalchemy.orm import Session
 from database.depends import get_db_session, token_verifier
 from services.comentario_service import ComentarioService
 
-from services.etapa_service import EtapaService, ProjetoNaoEncontradoException, ErroAoInserirEtapaException, EtapaNaoEncontradaException
 from services.projeto_service import ProjetoService
+from services.etapa_service import EtapaService, ProjetoNaoEncontradoException, ErroAoInserirEtapaException, EtapaNaoEncontradaException
 from services.tarefa_service import TarefaService
 from services.usuario_service import UsuarioLoginService
-from model.schemas import Usuario, UsuarioLogin, Projeto, AlterarInfoProjeto, Etapa, Tarefa, Comentario, UsuarioAlterarSenha
+from model.schemas import Usuario, UsuarioLogin, Projeto, Etapa, Tarefa, Comentario, UsuarioAlterarSenha
 from database.models import UsuarioModel, ProjetoModel, ViewInfosParticipantesProjetoModel
 
 db_session: Session = Depends(get_db_session)
@@ -155,25 +155,32 @@ def criar_projeto(id_usuario: int, projeto: Projeto, db_session: Session = Depen
     else:
         return sucesso
 
-@projeto_router.put('/{id_projeto}/editar-nome', summary="Editar o nome do Projeto")
-def editar_projeto(projeto_id: int, novoValorCampo: AlterarInfoProjeto, db_session: Session = Depends(get_db_session)):
+@projeto_router.put('/{id_projeto}/editar', summary="Editar projeto")
+def editar_projeto(projeto_id: int, projeto: Projeto, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
-    ps.editar_nome(id_projeto=projeto_id, novoValorCampo=novoValorCampo.nova_info)
-
-    return JSONResponse(
-        content='Nome do projeto alterado com sucesso!',
-        status_code=status.HTTP_200_OK
-    )
-
-@projeto_router.put('/{id_projeto}/editar-descricao', summary="Editar a descrição do Projeto")
-def editar_projeto(projeto_id: int, novoValorCampo: AlterarInfoProjeto, db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
-    ps.editar_descricao(id_projeto=projeto_id, novoValorCampo=novoValorCampo.nova_info)
-
-    return JSONResponse(
-        content='Descrição do projeto alterado com sucesso!',
-        status_code=status.HTTP_200_OK
-    )
+    try:
+        ps.editar_projeto(id_projeto=projeto_id, projeto_alteracao=projeto)
+    
+        return JSONResponse(
+            content={
+                'msg': "Projeto alterado com sucesso"
+            },
+            status_code=status.HTTP_200_OK
+        )
+    except ProjetoNaoEncontradoException as e:
+        return JSONResponse(
+            content={
+                'msg': f"{e.getMensagem()}"
+            },
+            status_code=status.HTTP_404_NOT_FOUND
+        )
+    except ErroAoInserirEtapaException as e:
+        return JSONResponse(
+            content={
+                'msg': f"{e.getMensagem()}"
+            },
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 @projeto_router.delete('/{projeto_id}', summary="Excluir um projeto")
 def excluir_projeto(projeto_id: int, db_session: Session = Depends(get_db_session)):
@@ -202,7 +209,7 @@ def listar_projeto_completo(projeto_id: int, db_session: Session = Depends(get_d
 # -------- ROTAS PARA ETAPAS -------- #
 
 # Endpoint para pegar no front-end os dados das etapas de um projeto específico para fornecer aos cards de projetos na página inicial
-@projeto_router.get('/{projeto_id}/etapa', summary="Listar as etapas de um projeto")
+@etapa_router.get('/{projeto_id}/etapa', summary="Listar as etapas de um projeto")
 def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)):
     es = EtapaService(db_session=db_session)
     etapas_dict = es.listar_etapas(projeto_id=projeto_id)
@@ -216,7 +223,7 @@ def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)
     else:
         return etapas_dict
     
-@projeto_router.post('/{projeto_id}/etapa', summary="Adiciona uma nova etapa")
+@etapa_router.post('/{projeto_id}/etapa', summary="Adiciona uma nova etapa")
 def adicionar_etapas(projeto_id: int, etapa: Etapa, db_session: Session = Depends(get_db_session)):
     etapa_service = EtapaService(db_session=db_session)
     
@@ -245,10 +252,8 @@ def adicionar_etapas(projeto_id: int, etapa: Etapa, db_session: Session = Depend
             },
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-    
-    
 
-@projeto_router.put('/etapa/{etapa_id}', summary="Editar uma etapa existente")
+@etapa_router.put('/etapa/{etapa_id}', summary="Editar uma etapa existente")
 def editar_etapa(etapa_id: int, etapa: Etapa, db_session: Session = Depends(get_db_session)):
     etapa_service = EtapaService(db_session=db_session)
     
@@ -260,7 +265,7 @@ def editar_etapa(etapa_id: int, etapa: Etapa, db_session: Session = Depends(get_
                 'msg': f"Nome da etapa alterado com sucesso para '{etapa.titulo}",
                 'id_etapa':  f"'{etapa_id}"
             },
-            status_code=status.HTTP_201_CREATED
+            status_code=status.HTTP_200_OK
         )
     except EtapaNaoEncontradaException as e:
         return JSONResponse(
@@ -277,7 +282,7 @@ def editar_etapa(etapa_id: int, etapa: Etapa, db_session: Session = Depends(get_
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-@projeto_router.delete('/etapa/{etapa_id}', summary="Exclui uma etapa")
+@etapa_router.delete('/etapa/{etapa_id}', summary="Exclui uma etapa")
 def excluir_etapa(etapa_id: int, db_session: Session = Depends(get_db_session)):
     etapa_service = EtapaService(db_session=db_session)
     
@@ -364,6 +369,16 @@ def excluir_tarefa(tarefa_id:int, db_session: Session = Depends(get_db_session))
     else:
         return sucesso
 
+@tarefas_router.put('/{tarefa_id}/mudar_etapa', summary="Muda a etapa de uma tarefa")
+def mudar_etapa(tarefa_id:int, nova_etapa_id:int, db_session: Session = Depends(get_db_session)):
+    ts = TarefaService(db_session=db_session)
+    sucesso, falha = ts.mudar_etapa(tarefa_id=tarefa_id, nova_etapa_id=nova_etapa_id)
+
+    if sucesso is None:
+        return falha
+    
+    else: 
+        return sucesso
 
 # -------- ROTAS PARA COMENTARIOS -------- #
 

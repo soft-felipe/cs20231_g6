@@ -148,4 +148,19 @@ class TarefaService:
             status_code=status.HTTP_200_OK
         ), None
 
+    def mudar_etapa(self, tarefa_id:int, nova_etapa_id:int):
+        tarefa = self.db_session.query(TarefaModel).filter_by(id_tarefa=tarefa_id).first()
+
+        if not tarefa:
+            return None, JSONResponse(
+                content={'error': 'Tarefa não encontrada'},
+                status_code=status.HTTP_404_NOT_FOUND
+            )
         
+        tarefa.id_etapa = nova_etapa_id
+        self.db_session.commit()
+
+        return JSONResponse(
+            content={'msg': "A tarefa trocou de etapa com sucesso."},
+            status_code=status.HTTP_200_OK
+        ), None
