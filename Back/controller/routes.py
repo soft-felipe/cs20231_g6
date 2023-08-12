@@ -123,7 +123,7 @@ def listar_projetos(id_usuario: int, db_session: Session = Depends(get_db_sessio
         status_code=status.HTTP_200_OK
     )
 
-@projeto_router.get('/{id_usuario}/listar-criados', summary="Listar os projetos que o usuário crioU")
+@projeto_router.get('/{id_usuario}/listar-criados', summary="Listar os projetos que o usuário criou")
 def listar_projetos_criados(id_usuario: int, db_session: Session = Depends(get_db_session)):
     us = UsuarioLoginService(db_session=db_session)
     usuario_existe, resposta = us.verifica_existencia_usuario(id_usuario=id_usuario)
@@ -176,7 +176,7 @@ def editar_projeto(projeto_id: int, novoValorCampo: AlterarInfoProjeto, db_sessi
     )
 
 @projeto_router.delete('/{projeto_id}', summary="Excluir um projeto")
-def excluir_projeto(projeto_id: int, db_session: Session = Depends(get_db_session), usuario: Usuario = Depends(get_db_session)):
+def excluir_projeto(projeto_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
     ps.deletar_projeto(id_projeto=projeto_id)
 
@@ -185,6 +185,19 @@ def excluir_projeto(projeto_id: int, db_session: Session = Depends(get_db_sessio
         status_code=status.HTTP_200_OK
     )
 
+@projeto_router.get('/{projeto_id}', summary="Traz todas as etapas, tarefas e comentarios associados a um projeto")
+def listar_projeto_completo(projeto_id: int, db_session: Session = Depends(get_db_session)):
+    ps = ProjetoService(db_session=db_session)
+    sucesso, falha = ps.listar_projeto_completo(id_projeto=projeto_id)
+
+    if sucesso is None:
+        return falha
+    
+    else:
+        return JSONResponse(
+            content=sucesso,
+            status_code=status.HTTP_200_OK
+        )
 
 # -------- ROTAS PARA ETAPAS -------- #
 
