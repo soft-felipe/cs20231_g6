@@ -3,12 +3,12 @@ from fastapi.responses import JSONResponse
 from psycopg2 import IntegrityError
 from sqlalchemy.orm import Session
 
+from services.etapa_service import EtapaService
 from model.schemas import  Projeto
 from database.models import ComentarioModel, EtapaModel, ProjetoModel, ProjetoParticipanteModel, TarefaModel, ViewInfosParticipantesProjetoModel
 from fastapi import status
 from fastapi.exceptions import HTTPException
 
-from services.etapa_service import EtapaService
 
 class ProjetoService:
     def __init__(self, db_session:Session):

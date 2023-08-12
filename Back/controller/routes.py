@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from database.depends import get_db_session, token_verifier
 from services.comentario_service import ComentarioService
 
-from services.etapa_service import EtapaService, ProjetoNaoEncontradoException, ErroAoInserirEtapaException, EtapaNaoEncontradaException
 from services.projeto_service import ProjetoService
+from services.etapa_service import EtapaService, ProjetoNaoEncontradoException, ErroAoInserirEtapaException, EtapaNaoEncontradaException
 from services.tarefa_service import TarefaService
 from services.usuario_service import UsuarioLoginService
 from model.schemas import Usuario, UsuarioLogin, Projeto, Etapa, Tarefa, Comentario, UsuarioAlterarSenha
