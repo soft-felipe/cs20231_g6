@@ -1,7 +1,14 @@
 from pydantic import BaseModel, validator, EmailStr, Field
 import datetime
-import re
-from typing import List
+
+
+class Login(BaseModel):
+    username: str
+    senha: str
+
+
+class Logout(BaseModel):
+    token: str
 
 
 class Usuario(BaseModel):
@@ -28,9 +35,14 @@ class Projeto(BaseModel):
     nome: str
     descricao: str
 
+
 class ProjetoParticipantes(BaseModel):
     id_projeto: int
     id_participante: int
+
+
+class BodyAdicionarParticipante(BaseModel):
+    email_novo_participante: str
 
 
 class Comentario(BaseModel):

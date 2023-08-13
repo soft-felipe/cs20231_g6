@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from psycopg2 import IntegrityError
 from sqlalchemy.orm import Session
 
+from services.usuario_service import UsuarioLoginService
 from services.etapa_service import EtapaService
 from model.schemas import  Projeto
 from database.models import ComentarioModel, EtapaModel, ProjetoModel, ProjetoParticipanteModel, TarefaModel, ViewInfosParticipantesProjetoModel
@@ -286,6 +287,13 @@ class ProjetoService:
         projetos_dict.append(projeto_dict)
             
         return projetos_dict, None
+
+    def add_participante(self, id_projeto, email):
+        us = UsuarioLoginService(db_session=self.db_session)
+        id_usuario = us.obtem_id_usuario(email=email)
+        self.relacionar_projeto_participante(id_projeto=id_projeto, id_participante=id_usuario)
+        self.db_session.commit()
+
 
 class ProjetoNaoEncontradoException(Exception):
     def __init__ (self, mensagem):
