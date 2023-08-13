@@ -18,10 +18,10 @@ db_session: Session = Depends(get_db_session)
 
 usuario_router = APIRouter(prefix='/usuario', tags=['Usuario'])
 test_router = APIRouter(prefix='/teste', dependencies=[Depends(token_verifier)], tags=['Teste Rota Segura'])
-projeto_router = APIRouter(prefix='/projeto', tags=['Projeto'])
-etapa_router = APIRouter(prefix='/etapa', tags=['Etapa'])
-tarefas_router = APIRouter(prefix='/tarefas', tags=['Tarefa'])
-comentario_router = APIRouter(prefix='/comentario', tags=['Comentario'])
+projeto_router = APIRouter(prefix='/projeto', tags=['Projeto'], dependencies=[Depends(token_verifier)])
+etapa_router = APIRouter(prefix='/etapa', tags=['Etapa'], dependencies=[Depends(token_verifier)])
+tarefas_router = APIRouter(prefix='/tarefas', tags=['Tarefa'], dependencies=[Depends(token_verifier)])
+comentario_router = APIRouter(prefix='/comentario', tags=['Comentario'], dependencies=[Depends(token_verifier)])
 
 
 # -------- ROTAS PARA USUÁRIO -------- #
