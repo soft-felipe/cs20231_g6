@@ -104,6 +104,21 @@ class UsuarioLoginService:
             'id_login': usuario_back.id_login
         }
 
+    def logout_usuario(self, token: str):
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        except jwt.ExpiredSignatureError:
+            payload = None
+
+        if payload:
+            payload['exp'] = datetime.utcnow()
+            return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+        else:
+            return JSONResponse(
+                content={"message": "Token inválido ou expirado"},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
     def verify_token(self, access_token):
         try:
             data = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -149,3 +164,15 @@ class UsuarioLoginService:
         self.db_session.commit()
         self.db_session.refresh(login_back)
         return login_back
+
+    def obtem_id_usuario(self, email):
+        login_back = self.db_session.query(UsuarioLoginModel).filter_by(email=email).first()
+
+        if login_back is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='Email do usuário não encontrado!'
+            )
+
+        usuario_back = self.db_session.query(UsuarioModel).filter_by(id_credencial=login_back.id_login).first()
+        return usuario_back.id_usuario
