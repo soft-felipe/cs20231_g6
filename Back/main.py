@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from controller.routes import usuario_router, projeto_router, tarefas_router, comentario_router, etapa_router, test_router
 
-app = FastAPI()
+app = FastAPI(
+    title="Construção de Software: Rotas backend NoteSync",
+    description="Esta é a documentação de todas as rotas do backend do nosso projeto de API Rest",
+    version="1.0.0"
+)
 
 @app.get("/")
 def home():
