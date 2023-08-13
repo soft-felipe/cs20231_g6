@@ -11,7 +11,7 @@ from services.projeto_service import ProjetoService
 from services.etapa_service import EtapaService, ProjetoNaoEncontradoException, ErroAoInserirEtapaException, EtapaNaoEncontradaException
 from services.tarefa_service import TarefaService
 from services.usuario_service import UsuarioLoginService
-from model.schemas import Usuario, UsuarioLogin, Projeto, Etapa, Tarefa, Comentario, UsuarioAlterarSenha
+from model.schemas import Login, Logout, Usuario, UsuarioLogin, Projeto, Etapa, Tarefa, Comentario, UsuarioAlterarSenha, BodyAdicionarParticipante
 from database.models import UsuarioModel, ProjetoModel, ViewInfosParticipantesProjetoModel
 
 db_session: Session = Depends(get_db_session)
@@ -26,14 +26,14 @@ comentario_router = APIRouter(prefix='/comentario', tags=['Comentario'])
 
 # -------- ROTAS PARA USUÁRIO -------- #
 
-@usuario_router.post('/cadastrar-login', summary="Cadastro de credenciais: login, senha, email ")
+@usuario_router.post('/cadastrar-login', summary="Cadastro de credenciais: login, senha, email")
 def registrar_login(usuario_login: UsuarioLogin, db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     id_usuario_login = uc.registrar_usuario_login(usuario=usuario_login)
 
     return JSONResponse(
         content={
-            'msg': "Usuario registrado com sucesso.",
+            'msg': "Usuário registrado com sucesso!",
             'id_login': id_usuario_login
         },
         status_code=status.HTTP_201_CREATED
@@ -63,7 +63,7 @@ def listar_usuarios(db_session: Session = Depends(get_db_session)):
     )
 
 @usuario_router.post('/login', summary='Rota para o usuario realizar login')
-def login_usuario(request_form_usuario: UsuarioLogin, db_session: Session = Depends(get_db_session)):
+def login_usuario(request_form_usuario: Login, db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     usuario = UsuarioLogin(
         username=request_form_usuario.username,
@@ -75,7 +75,14 @@ def login_usuario(request_form_usuario: UsuarioLogin, db_session: Session = Depe
         status_code=status.HTTP_200_OK
     )
 
-#TODO LOGOUT?
+@usuario_router.post('/logout', summary='Rota para o usuario realizar logout')
+def logout_usuario(token: Logout, db_session: Session = Depends(get_db_session)):
+    uc = UsuarioLoginService(db_session=db_session)
+    new_token = uc.logout_usuario(token.token)
+    return JSONResponse(
+        content={"message": "Logout realizado com sucesso", "new_token": new_token},
+        status_code=status.HTTP_200_OK
+    )
 
 @usuario_router.post('/{id_usuario}/alterar-senha', summary="Alterar senha validando: senha atual, username e login")
 def alterar_senha_usuario(id_usuario: int, usuario_alterar_senha: UsuarioAlterarSenha, db_session: Session = Depends(get_db_session)):
@@ -96,17 +103,6 @@ def teste_login():
 
 
 # -------- ROTAS PARA PROJETO -------- #
-
-# Pra listarmos os projetos, precisamos de um usuário logado
-@projeto_router.get('/desenvolver', summary='Lista todos os projetos')
-def listar_projetos(db_session: Session = Depends(get_db_session)):
-    ps = ProjetoService(db_session=db_session)
-    projetos_dict = ps.listar_projetos()
-
-    return JSONResponse(
-        content=projetos_dict,
-        status_code=status.HTTP_200_OK
-    )
 
 @projeto_router.get('/{id_usuario}/listar', summary="Listar projetos que o usuário participa")
 def listar_projetos(id_usuario: int, db_session: Session = Depends(get_db_session)):
@@ -205,6 +201,16 @@ def listar_projeto_completo(projeto_id: int, db_session: Session = Depends(get_d
             content=sucesso,
             status_code=status.HTTP_200_OK
         )
+
+@projeto_router.post('/{projeto_id}/adicionar-participante', summary="Adiciona um participante no projeto pelo seu email")
+def adicionar_participante(bodyAdicionarParticipante: BodyAdicionarParticipante, projeto_id: int, db_session: Session = Depends(get_db_session)):
+    ps = ProjetoService(db_session=db_session)
+    ps.add_participante(id_projeto=projeto_id, email=bodyAdicionarParticipante.email_novo_participante)
+
+    return JSONResponse(
+        content=f'Participante com email {bodyAdicionarParticipante.email_novo_participante} adicionado com sucesso!',
+        status_code=status.HTTP_200_OK
+    )
 
 # -------- ROTAS PARA ETAPAS -------- #
 
