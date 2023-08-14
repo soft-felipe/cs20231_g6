@@ -62,6 +62,14 @@ def listar_usuarios(db_session: Session = Depends(get_db_session)):
         status_code=status.HTTP_200_OK
     )
 
+@usuario_router.get('/listar/{id_usuario}', summary="Listar todos os dados de um usuário")
+def listar_usuario(id_usuario: int, db_session: Session = Depends(get_db_session)):
+    us = UsuarioLoginService(db_session=db_session)
+    resposta = us.listar_usuario(id_usuario=id_usuario)
+
+    return resposta
+
+
 @usuario_router.post('/login', summary='Rota para o usuario realizar login')
 def login_usuario(request_form_usuario: Login, db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)

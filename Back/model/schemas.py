@@ -23,6 +23,13 @@ class UsuarioLogin(BaseModel):
     senha: str
     email: str = Field(None)
 
+class UsuarioDados(BaseModel):
+    username: str
+    apelido: str
+    nome_completo: str
+    data_nasc: datetime.date
+    avatar: str = Field(None)
+    email: str 
 
 class UsuarioAlterarSenha(BaseModel):
     username: str

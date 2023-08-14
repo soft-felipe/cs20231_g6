@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database.models import UsuarioModel, UsuarioLoginModel
-from model.schemas import Usuario, UsuarioLogin, UsuarioAlterarSenha
+from model.schemas import Usuario, UsuarioDados, UsuarioLogin, UsuarioAlterarSenha
 from passlib.context import CryptContext
 from fastapi.exceptions import HTTPException
 from fastapi import status
@@ -10,6 +10,7 @@ from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from decouple import config
 from email_validator import EmailNotValidError, validate_email
+from fastapi.encoders import jsonable_encoder
 
 SECRET_KEY = config('SECRET_KEY')
 ALGORITHM = config('ALGORITHM')
@@ -20,6 +21,39 @@ crypt_context = CryptContext(schemes=['sha256_crypt'])
 class UsuarioLoginService:
     def __init__(self, db_session: Session):
         self.db_session = db_session
+
+    def listar_usuario(self, id_usuario:int):
+        usuario = self.db_session.query(UsuarioModel).filter_by(id_usuario=id_usuario).first()
+
+        if not usuario:
+            return JSONResponse(
+                content="Usuario não encontrado",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+        
+        usuario_login = self.db_session.query(UsuarioLoginModel).filter_by(id_login=usuario.id_credencial).first()
+
+        if not usuario_login:
+            return JSONResponse(
+                content="Usuario não encontrado",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
+        usuario_final = UsuarioDados(
+            username = usuario_login.username,
+            apelido = usuario.apelido,
+            nome_completo = usuario.nome_completo,
+            data_nasc = usuario.data_nasc,
+            avatar = usuario.avatar,
+            email = usuario_login.email
+        )
+
+        json_encoded = jsonable_encoder(usuario_final)
+
+        return JSONResponse(
+            content=json_encoded,
+            status_code=status.HTTP_200_OK
+        )
 
     def registrar_usuario_login(self, usuario: UsuarioLogin):
         email_valido = self.validar_email(usuario.email)
