@@ -2,7 +2,6 @@ import traceback
 
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from database.depends import get_db_session, token_verifier
 from services.comentario_service import ComentarioService
@@ -223,7 +222,7 @@ def adicionar_participante(bodyAdicionarParticipante: BodyAdicionarParticipante,
 # -------- ROTAS PARA ETAPAS -------- #
 
 # Endpoint para pegar no front-end os dados das etapas de um projeto específico para fornecer aos cards de projetos na página inicial
-@etapa_router.get('/{projeto_id}/etapa', summary="Listar as etapas de um projeto")
+@etapa_router.get('/{projeto_id}/listar-etapas', summary="Listar as etapas de um projeto")
 def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)):
     es = EtapaService(db_session=db_session)
     etapas_dict = es.listar_etapas(projeto_id=projeto_id)
@@ -237,7 +236,7 @@ def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)
     else:
         return etapas_dict
     
-@etapa_router.post('/{projeto_id}/etapa', summary="Adiciona uma nova etapa")
+@etapa_router.post('/{projeto_id}/adicionar-etapa', summary="Adiciona uma nova etapa")
 def adicionar_etapas(projeto_id: int, etapa: Etapa, db_session: Session = Depends(get_db_session)):
     etapa_service = EtapaService(db_session=db_session)
     
