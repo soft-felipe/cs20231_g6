@@ -15,32 +15,7 @@ export function UserLoginForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
   const [user, setUser] = React.useState(null)
 
-  const baseURL = 'http://18.233.10.135'
-
-  const handleSubmit = async e => {
-    setIsLoading(true);
-    e.preventDefault();
-
-    const usernameInput = document.getElementById("username") as HTMLInputElement;
-    const senhaInput = document.getElementById("senha") as HTMLInputElement;
-    const emailInput = document.getElementById("email") as HTMLInputElement;
-
-    const requestBody = {
-      username: usernameInput.value,
-      senha: senhaInput.value,
-      email: emailInput.value,
-  };
-    // enviar o nome de usuário e a senha ao servidor
-    const response = await api.post(
-      `${baseURL}/usuario/login`,
-      requestBody
-    );
-    // definir o state do usuário
-    setUser(response.data)
-    // armazenar o usuário em localStorage
-    localStorage.setItem('user', response.data)
-    console.log(response.data)
-  };
+  const baseURL = 'http://18.233.10.135/'
 
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
@@ -48,28 +23,31 @@ export function UserLoginForm({ className, ...props }: UserAuthFormProps) {
   
     const usernameInput = document.getElementById("username") as HTMLInputElement;
     const senhaInput = document.getElementById("senha") as HTMLInputElement;
-    const emailInput = document.getElementById("email") as HTMLInputElement;
+    //const emailInput = document.getElementById("email") as HTMLInputElement;
 
     const requestBody = {
         username: usernameInput.value,
         senha: senhaInput.value,
-        email: emailInput.value,
+        //email: emailInput.value,
     };
+
+    const data = JSON.stringify(requestBody);
     
     console.log(requestBody);
 
-    api.post(`${baseURL}/usuario/login`,requestBody
+    api.post(`${baseURL}usuario/login`,data
     )
       .then((response) => setIsLoading(false)) //
       .catch((err) => {
-        console.error("Erro ao logar o usuário!" + err);
+        console.log(JSON.stringify(err))
       });
     }
+
   return (
     <div className={cn("grid gap-6", className)} {...props}>
       <form onSubmit={onSubmit}>
         <div className="grid gap-2">
-          <div className="grid gap-1">
+          {/*<div className="grid gap-1">
             <Label className="sr-only" htmlFor="email">
               Email
             </Label>
@@ -82,7 +60,7 @@ export function UserLoginForm({ className, ...props }: UserAuthFormProps) {
               autoCorrect="off"
               disabled={isLoading}
             />
-          </div>
+  </div>*/}
           <div className="grid gap-1">
             <Label className="sr-only" htmlFor="username">
               User
@@ -111,7 +89,7 @@ export function UserLoginForm({ className, ...props }: UserAuthFormProps) {
               disabled={isLoading}
             />
           </div>
-          <Button disabled={isLoading} onClick={handleSubmit}>
+          <Button disabled={isLoading} onClick={onSubmit}>
             {isLoading && (
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
             )}
