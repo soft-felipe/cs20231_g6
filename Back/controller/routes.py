@@ -63,11 +63,11 @@ def listar_usuarios(db_session: Session = Depends(get_db_session)):
     )
 
 @usuario_router.post('/login', summary='Rota para o usuario realizar login')
-def login_usuario(request_form_usuario: OAuth2PasswordRequestForm = Depends(), db_session: Session = Depends(get_db_session)):
+def login_usuario(request_form_usuario: Login, db_session: Session = Depends(get_db_session)):
     uc = UsuarioLoginService(db_session=db_session)
     usuario = UsuarioLogin(
         username=request_form_usuario.username,
-        senha=request_form_usuario.password
+        senha=request_form_usuario.senha
     )
     auth_data = uc.login_usuario(usuario=usuario)
     return JSONResponse(
