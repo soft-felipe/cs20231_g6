@@ -97,12 +97,25 @@ class UsuarioLoginService:
         }
 
         access_token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+        id_usuario = self.obtem_id_usuario_login(usuario_back.id_login)
 
         return {
             'access_token': access_token,
             'exp': exp.isoformat(),
-            'id_login': usuario_back.id_login
+            'id_login': usuario_back.id_login,
+            'id_usuario': id_usuario
         }
+
+    def obtem_id_usuario_login(self, id_login):
+        usuario_back = self.db_session.query(UsuarioModel).filter_by(id_credencial=id_login).first()
+
+        if usuario_back is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='O usuário não foi cadastrado!'
+            )
+
+        return usuario_back.id_usuario
 
     def logout_usuario(self, token: str):
         try:
