@@ -9,7 +9,7 @@ app = FastAPI(
 
 @app.get("/")
 def home():
-    return "Salve"
+    return "CS-NOTESYNC: Oi, você vem sempre aqui?"
 
 app.include_router(router=usuario_router)
 app.include_router(router=projeto_router) 
