@@ -26,6 +26,16 @@ class UsuarioLoginService:
             senha=crypt_context.hash(usuario.senha),
             email=usuario.email
         )
+
+        username_ja_cadastrado = self.db_session.query(UsuarioLoginModel).filter_by(username=usuario.username).first()
+        email_ja_cadastrado = self.db_session.query(UsuarioLoginModel).filter_by(email=usuario.email).first()
+
+        if username_ja_cadastrado is not None or email_ja_cadastrado is not None:
+            raise HTTPException(
+                detail="Username ou Email já cadastrados para outro LOGIN!",
+                status_code=status.HTTP_401_UNAUTHORIZED
+            )
+
         try:
             self.db_session.add(usuario_login_model)
             self.db_session.commit()
