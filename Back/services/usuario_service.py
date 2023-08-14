@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from decouple import config
+from email_validator import EmailNotValidError, validate_email
 
 SECRET_KEY = config('SECRET_KEY')
 ALGORITHM = config('ALGORITHM')
@@ -21,6 +22,14 @@ class UsuarioLoginService:
         self.db_session = db_session
 
     def registrar_usuario_login(self, usuario: UsuarioLogin):
+        email_valido = self.validar_email(usuario.email)
+
+        if not email_valido:
+            raise HTTPException(
+                detail='Endereço de email invalido',
+                status_code=status.HTTP_406_NOT_ACCEPTABLE
+            )
+        
         usuario_login_model = UsuarioLoginModel(
             username=usuario.username,
             senha=crypt_context.hash(usuario.senha),
@@ -45,6 +54,14 @@ class UsuarioLoginService:
                 detail="Erro ao inserir login do usuario",
                 status_code=status.HTTP_400_BAD_REQUEST
             )
+
+    def validar_email(self, email:str):
+        try:
+            validate_email(email, check_deliverability=False)
+            return True
+
+        except EmailNotValidError as e:
+            return False
 
     def registrar_usuario(self, usuario: Usuario, id_credencial: int):
         usuario_model = UsuarioModel(
