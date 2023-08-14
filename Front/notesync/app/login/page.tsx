@@ -12,14 +12,14 @@ function LoginPage() {
       <>
       <div className="md:hidden">
         <Image
-          src="/examples/authentication-light.png"
+          src="/img/Absolute_Reality_v16_Design_Desktop_screen_monitor_Board_Kanba_0.jpg"
           width={1280}
           height={843}
           alt="Authentication"
           className="block dark:hidden"
         />
         <Image
-          src="/examples/authentication-dark.png"
+          src="/../../img/Absolute_Reality_v16_Design_Desktop_screen_monitor_Board_Kanba_0.jpg"
           width={1280}
           height={843}
           alt="Authentication"
