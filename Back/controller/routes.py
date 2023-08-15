@@ -16,10 +16,10 @@ db_session: Session = Depends(get_db_session)
 
 usuario_router = APIRouter(prefix='/usuario', tags=['Usuario'])
 test_router = APIRouter(prefix='/teste', dependencies=[Depends(token_verifier)], tags=['Teste Rota Segura'])
-projeto_router = APIRouter(prefix='/projeto', tags=['Projeto'])
-etapa_router = APIRouter(prefix='/etapa', tags=['Etapa'])
-tarefas_router = APIRouter(prefix='/tarefas', tags=['Tarefa'])
-comentario_router = APIRouter(prefix='/comentario', tags=['Comentario'])
+projeto_router = APIRouter(prefix='/projeto', tags=['Projeto'], dependencies=[Depends(token_verifier)])
+etapa_router = APIRouter(prefix='/etapa', tags=['Etapa'], dependencies=[Depends(token_verifier)])
+tarefas_router = APIRouter(prefix='/tarefas', tags=['Tarefa'], dependencies=[Depends(token_verifier)])
+comentario_router = APIRouter(prefix='/comentario', tags=['Comentario'], dependencies=[Depends(token_verifier)])
 
 
 # -------- ROTAS PARA USUÁRIO -------- #
@@ -96,7 +96,7 @@ def alterar_senha_usuario(id_usuario: int, usuario_alterar_senha: UsuarioAlterar
     usuario_atualizado = uc.valida_senha_email(id_usuario=id_usuario, usuario_alterar_senha=usuario_alterar_senha)
 
     return JSONResponse(
-        content=f'Senha do usuario {usuario_atualizado.username} foi atualizada!',
+        content={f'Senha do usuario {usuario_atualizado.username} foi atualizada!'},
         status_code=status.HTTP_200_OK
     )
 
