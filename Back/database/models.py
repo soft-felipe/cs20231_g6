@@ -48,7 +48,6 @@ class TarefaModel(Base, SerializerMixin):
 
     id_tarefa = Column('id_tarefa', Integer, primary_key=True, autoincrement=True)
     id_criador = Column('id_criador', Integer, ForeignKey('usuario.id_usuario'))
-    id_responsavel = Column('id_responsavel', Integer, ForeignKey('usuario.id_usuario'))
     id_etapa = Column('id_etapa', Integer, ForeignKey('etapa.id_etapa'))
     descricao = Column('descricao', String(200))
 

@@ -30,7 +30,7 @@ class EtapaService:
         return etapas_dict
     
     def criar_etapa(self, projeto_id: int, etapa: Etapa):
-        projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto = projeto_id).first()
+        projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto=projeto_id).first()
         
         if not projeto:
             raise ProjetoNaoEncontradoException(f"Projeto com id='{projeto_id}' não encontrado")
@@ -44,7 +44,7 @@ class EtapaService:
             self.db_session.add(etapa_model)
             self.db_session.flush()
             self.db_session.commit()
-            return etapa_model.id_etapa
+            return etapa_model
         except Exception:
             traceback.print_exc()
             self.db_session.rollback()

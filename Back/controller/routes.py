@@ -11,16 +11,15 @@ from services.etapa_service import EtapaService, ProjetoNaoEncontradoException, 
 from services.tarefa_service import TarefaService
 from services.usuario_service import UsuarioLoginService
 from model.schemas import Login, Logout, Usuario, UsuarioLogin, Projeto, Etapa, Tarefa, Comentario, UsuarioAlterarSenha, BodyAdicionarParticipante
-from database.models import UsuarioModel, ProjetoModel, ViewInfosParticipantesProjetoModel
 
 db_session: Session = Depends(get_db_session)
 
 usuario_router = APIRouter(prefix='/usuario', tags=['Usuario'])
 test_router = APIRouter(prefix='/teste', dependencies=[Depends(token_verifier)], tags=['Teste Rota Segura'])
-projeto_router = APIRouter(prefix='/projeto', tags=['Projeto'], dependencies=[Depends(token_verifier)])
-etapa_router = APIRouter(prefix='/etapa', tags=['Etapa'], dependencies=[Depends(token_verifier)])
-tarefas_router = APIRouter(prefix='/tarefas', tags=['Tarefa'], dependencies=[Depends(token_verifier)])
-comentario_router = APIRouter(prefix='/comentario', tags=['Comentario'], dependencies=[Depends(token_verifier)])
+projeto_router = APIRouter(prefix='/projeto', tags=['Projeto'])
+etapa_router = APIRouter(prefix='/etapa', tags=['Etapa'])
+tarefas_router = APIRouter(prefix='/tarefas', tags=['Tarefa'])
+comentario_router = APIRouter(prefix='/comentario', tags=['Comentario'])
 
 
 # -------- ROTAS PARA USUÁRIO -------- #
@@ -209,7 +208,7 @@ def listar_projeto_completo(projeto_id: int, db_session: Session = Depends(get_d
             status_code=status.HTTP_200_OK
         )
 
-@projeto_router.post('/{projeto_id}/adicionar-participante', summary="Adiciona um participante no projeto pelo seu email")
+@projeto_router.post('/adicionar-participante/{projeto_id}', summary="Adiciona um participante no projeto pelo seu email")
 def adicionar_participante(bodyAdicionarParticipante: BodyAdicionarParticipante, projeto_id: int, db_session: Session = Depends(get_db_session)):
     ps = ProjetoService(db_session=db_session)
     ps.add_participante(id_projeto=projeto_id, email=bodyAdicionarParticipante.email_novo_participante)
@@ -219,9 +218,35 @@ def adicionar_participante(bodyAdicionarParticipante: BodyAdicionarParticipante,
         status_code=status.HTTP_200_OK
     )
 
+@projeto_router.get('/etapas-padrao/{projeto_id}', summary="Retorna uma lista de JSON de etapas default")
+def etapas_default(projeto_id: int, db_session: Session = Depends(get_db_session)):
+    etapas = ['Not Started', 'In Progress', 'Recently Done', 'Done', 'Waiting Validation', 'On Hold']
+    etapa_service = EtapaService(db_session=db_session)
+    infos_etapas = []
+
+    try:
+        for etapa in etapas:
+            etapa_tmp = Etapa(titulo=etapa)
+            etapa_criada = etapa_service.criar_etapa(projeto_id=projeto_id, etapa=etapa_tmp)
+            json = {
+                'id_etapa': etapa_criada.id_etapa,
+                'nome': etapa_criada.nome
+            }
+            infos_etapas.append(json)
+
+        return JSONResponse(
+            content={'msg': 'Sucesso! Etapas padrão foram criadas', 'etapas_criadas': infos_etapas},
+            status_code=status.HTTP_200_OK
+        )
+
+    except Exception:
+        return JSONResponse(
+            content={'msg': 'Falha ao criar etapas padrão'},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
 # -------- ROTAS PARA ETAPAS -------- #
 
-# Endpoint para pegar no front-end os dados das etapas de um projeto específico para fornecer aos cards de projetos na página inicial
 @etapa_router.get('/{projeto_id}/listar-etapas', summary="Listar as etapas de um projeto")
 def listar_etapas(projeto_id: int, db_session: Session = Depends(get_db_session)):
     es = EtapaService(db_session=db_session)
@@ -241,12 +266,12 @@ def adicionar_etapas(projeto_id: int, etapa: Etapa, db_session: Session = Depend
     etapa_service = EtapaService(db_session=db_session)
     
     try:
-        id_etapa = etapa_service.criar_etapa(projeto_id=projeto_id, etapa=etapa)
+        etapa_criada = etapa_service.criar_etapa(projeto_id=projeto_id, etapa=etapa)
         
         return JSONResponse(
             content={
                 'msg': f"Etapa '{etapa.titulo}' criada com sucesso no projeto '{projeto_id}'",
-                'id_etapa':  f"'{id_etapa}"
+                'id_etapa':  f"'{etapa_criada.id_etapa}"
             },
             status_code=status.HTTP_201_CREATED
         )
@@ -327,7 +352,7 @@ def excluir_etapa(etapa_id: int, db_session: Session = Depends(get_db_session)):
 
 # -------- ROTAS PARA TAREFAS -------- #
 
-@tarefas_router.get('/{projeto_id}/{etapa_id}', summary='Listar as tarefas de uma determindada etapa e projeto ')
+@tarefas_router.get('/{projeto_id}/{etapa_id}', summary='Listar as tarefas de uma determindada etapa e projeto')
 def listar_tarefas(projeto_id: int, etapa_id: int, db_session: Session = Depends(get_db_session)):
     ts = TarefaService(db_session=db_session)
     tarefas_dict, respostaJSON = ts.listar_tarefas(projeto_id=projeto_id, etapa_id=etapa_id)
@@ -338,7 +363,7 @@ def listar_tarefas(projeto_id: int, etapa_id: int, db_session: Session = Depends
     else:
         return tarefas_dict
 
-@tarefas_router.post('/{projeto_id}/{etapa_id}', summary="Adicionar uma nova tarefa à uma etapa ")
+@tarefas_router.post('/{projeto_id}/{etapa_id}', summary="Adicionar uma nova tarefa à uma etapa")
 def adicinar_tarefa(projeto_id: int, etapa_id: int, tarefa: Tarefa, db_session: Session = Depends(get_db_session)):
     ts = TarefaService(db_session=db_session)
     sucesso, falha = ts.adicionar_tarefa(projeto_id=projeto_id, etapa_id=etapa_id, tarefa=tarefa)
@@ -349,8 +374,8 @@ def adicinar_tarefa(projeto_id: int, etapa_id: int, tarefa: Tarefa, db_session: 
     else: 
         return sucesso
 
-@tarefas_router.put('/{tarefa_id}/descricao', summary="Editar descrição de uma tarefa existente ")
-def editar_tarefa_descricao(tarefa_id:int, descricao:str, db_session: Session = Depends(get_db_session)):
+@tarefas_router.put('/{tarefa_id}/descricao', summary="Editar descrição de uma tarefa existente")
+def editar_tarefa_descricao(tarefa_id: int, descricao: str, db_session: Session = Depends(get_db_session)):
     ts = TarefaService(db_session=db_session)
     sucesso, falha = ts.editar_tarefa_descricao(tarefa_id=tarefa_id, descricao=descricao)
 
@@ -359,17 +384,17 @@ def editar_tarefa_descricao(tarefa_id:int, descricao:str, db_session: Session = 
     
     else: 
         return sucesso
-    
-@tarefas_router.put('/{tarefa_id}/responsavel', summary='Altera o responsavel pela tarefa existente ')
-def editar_tarefa_responsavel(tarefa_id:int, id_responsavel:int, db_session: Session = Depends(get_db_session)):
-    ts = TarefaService(db_session=db_session)
-    sucesso, falha = ts.editar_tarefa_responsavel(tarefa_id=tarefa_id, id_responsavel=id_responsavel)
 
-    if sucesso is None:
-        return falha
-    
-    else: 
-        return sucesso
+# DEPRECATED
+# @tarefas_router.put('/{tarefa_id}/responsavel', summary='Altera o responsavel pela tarefa existente')
+# def editar_tarefa_responsavel(tarefa_id:int, id_responsavel:int, db_session: Session = Depends(get_db_session)):
+#     ts = TarefaService(db_session=db_session)
+#     sucesso, falha = ts.editar_tarefa_responsavel(tarefa_id=tarefa_id, id_responsavel=id_responsavel)
+#
+#     if sucesso is None:
+#         return falha
+#     else:
+#         return sucesso
 
 @tarefas_router.delete('/{tarefa_id}', summary="Exclui uma tarefa existente")
 def excluir_tarefa(tarefa_id:int, db_session: Session = Depends(get_db_session)):

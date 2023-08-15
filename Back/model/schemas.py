@@ -59,7 +59,6 @@ class Comentario(BaseModel):
 
 class Tarefa(BaseModel):
     id_criador: int
-    id_responsavel: int
     descricao: str
 
 

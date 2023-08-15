@@ -12,24 +12,21 @@ class TarefaService:
 
     
     def listar_tarefas(self, projeto_id: int, etapa_id: int):
-        # Lógica para listar as tarefas de uma etapa específica de um projeto
         projeto = self.db_session.query(ProjetoModel).filter_by(id_projeto=projeto_id).first()
-
         if not projeto:
             return None, JSONResponse(
                 content={'error': 'Projeto não encontrado'},
                 status_code=status.HTTP_404_NOT_FOUND
             )
 
-        etapa = self.db_session.query(EtapaModel).filter_by(id_etapa = etapa_id).first()
-
+        etapa = self.db_session.query(EtapaModel).filter_by(id_etapa=etapa_id).first()
         if not etapa:
             return None, JSONResponse(
                 content={'error': 'Etapa não encontrada'},
                 status_code=status.HTTP_404_NOT_FOUND
             )
 
-        tarefas = self.db_session.query(TarefaModel).filter_by(id_etapa = etapa_id).all()
+        tarefas = self.db_session.query(TarefaModel).filter_by(id_etapa=etapa_id).all()
 
         tarefas_dict = []
         for tarefa in tarefas:
@@ -63,7 +60,6 @@ class TarefaService:
         
         nova_tarefa = TarefaModel(
             id_criador = tarefa.id_criador,
-            id_responsavel = tarefa.id_responsavel,
             id_etapa = etapa_id,
             descricao = tarefa.descricao
         )
@@ -93,30 +89,31 @@ class TarefaService:
             status_code=status.HTTP_200_OK
         ), None
 
-    def editar_tarefa_responsavel(self, tarefa_id:int, id_responsavel:int):
-        tarefa = self.db_session.query(TarefaModel).filter_by(id_tarefa=tarefa_id).first()
-
-        if not tarefa:
-            return None, JSONResponse(
-                content={'error': 'Tarefa não encontrada'},
-                status_code=status.HTTP_404_NOT_FOUND
-            )
-        
-        responsavel = self.db_session.query(UsuarioModel).filter_by(id_usuario=id_responsavel).first()
-
-        if not responsavel:
-            return None, JSONResponse(
-                content={'error': 'Usuário não encontrado'},
-                status_code=status.HTTP_404_NOT_FOUND
-            )
-
-        tarefa.id_responsavel = id_responsavel
-        self.db_session.commit()
-        
-        return JSONResponse(
-            content={'msg': "O usuário responsavel pela tarefa foi alterado."},
-            status_code=status.HTTP_200_OK
-        ), None
+    # DEPRECATED
+    # def editar_tarefa_responsavel(self, tarefa_id:int, id_responsavel:int):
+    #     tarefa = self.db_session.query(TarefaModel).filter_by(id_tarefa=tarefa_id).first()
+    #
+    #     if not tarefa:
+    #         return None, JSONResponse(
+    #             content={'error': 'Tarefa não encontrada'},
+    #             status_code=status.HTTP_404_NOT_FOUND
+    #         )
+    #
+    #     responsavel = self.db_session.query(UsuarioModel).filter_by(id_usuario=id_responsavel).first()
+    #
+    #     if not responsavel:
+    #         return None, JSONResponse(
+    #             content={'error': 'Usuário não encontrado'},
+    #             status_code=status.HTTP_404_NOT_FOUND
+    #         )
+    #
+    #     tarefa.id_responsavel = id_responsavel
+    #     self.db_session.commit()
+    #
+    #     return JSONResponse(
+    #         content={'msg': "O usuário responsavel pela tarefa foi alterado."},
+    #         status_code=status.HTTP_200_OK
+    #     ), None
 
     def excluir_tarefa(self, tarefa_id:int):
         tarefa = self.db_session.query(TarefaModel).filter_by(id_tarefa=tarefa_id).first()
@@ -148,7 +145,7 @@ class TarefaService:
             status_code=status.HTTP_200_OK
         ), None
 
-    def mudar_etapa(self, tarefa_id:int, nova_etapa_id:int):
+    def mudar_etapa(self, tarefa_id: int, nova_etapa_id: int):
         tarefa = self.db_session.query(TarefaModel).filter_by(id_tarefa=tarefa_id).first()
 
         if not tarefa:
