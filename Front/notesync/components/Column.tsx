@@ -1,3 +1,5 @@
+"use client"
+
 import React from 'react'
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
 import { Todo } from '../components/ui/todo'

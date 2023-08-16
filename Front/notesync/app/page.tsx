@@ -1,3 +1,5 @@
+"use client"
+
 import Image from 'next/image'
 import Link from "next/link"
 
@@ -11,14 +13,14 @@ export default function Home() {
       <>
       <div className="md:hidden">
         <Image
-          src="/examples/authentication-light.png"
+          src="/public/images/logo.png"
           width={1280}
           height={843}
           alt="Authentication"
           className="block dark:hidden"
         />
         <Image
-          src="/examples/authentication-dark.png"
+          src="/public/images/logo.png"
           width={1280}
           height={843}
           alt="Authentication"
