@@ -291,7 +291,7 @@ def adicionar_etapas(projeto_id: int, etapa: Etapa, db_session: Session = Depend
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-@etapa_router.put('/etapa/{etapa_id}', summary="Editar uma etapa existente")
+@etapa_router.put('/{etapa_id}', summary="Editar uma etapa existente")
 def editar_etapa(etapa_id: int, etapa: Etapa, db_session: Session = Depends(get_db_session)):
     etapa_service = EtapaService(db_session=db_session)
     
@@ -320,7 +320,7 @@ def editar_etapa(etapa_id: int, etapa: Etapa, db_session: Session = Depends(get_
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-@etapa_router.delete('/etapa/{etapa_id}', summary="Exclui uma etapa")
+@etapa_router.delete('/{etapa_id}', summary="Exclui uma etapa")
 def excluir_etapa(etapa_id: int, db_session: Session = Depends(get_db_session)):
     etapa_service = EtapaService(db_session=db_session)
     
